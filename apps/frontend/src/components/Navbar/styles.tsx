@@ -7,6 +7,7 @@ export const Nav = styled.nav`
   z-index: 2;
   box-sizing: border-box;
   display: block;
+  background-color: #ffffff20;
 `;
 
 export const Box = styled.div`
