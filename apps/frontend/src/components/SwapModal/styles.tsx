@@ -257,8 +257,8 @@ export const BridgeModalContainer = styled.div`
     3px 20px 20px rgba(139, 114, 176, 0.1),
     10px 20px 20px rgba(139, 114, 176, 0.1),
     0 10px 30px rgba(139, 114, 176, 0.4);
-
   margin: 30px auto 0;
   transition: height 3s ease-out;
   position: relative;
+  overflow: hidden;
 `;

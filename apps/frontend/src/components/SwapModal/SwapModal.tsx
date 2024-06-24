@@ -18,6 +18,7 @@ import {
   TokenInput,
   TokenSelectButton,
 } from "./styles";
+import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -43,6 +44,8 @@ export enum ConfirmModalState {
 const SwapModal = () => {
   const [swapState, setSwapState] = useState(true);
   const [inputValue, setInputValue] = useState("");
+  const [showProivdersPopOver, setShowProvidersPopOver] =
+    useState<boolean>(false);
 
   const [asset] = useState<ERC20Token | undefined>(
     new ERC20Token(
@@ -62,7 +65,15 @@ const SwapModal = () => {
     <>
       <div className=" mt-[20px] flex flex-col items-center justify-center">
         <BridgeModalContainer>
-          {/* <UniswapLogoPink /> */}
+          {/* <CurrencySelectPopOver
+            setShowProvidersPopOver={setShowProvidersPopOver}
+            showProivdersPopOver={showProivdersPopOver}
+          /> */}
+
+          <CurrencySelectPopOver
+            setShowProvidersPopOver={setShowProvidersPopOver}
+            showProivdersPopOver={showProivdersPopOver}
+          />
           <div className="flex justify-between px-2">
             <div>Swap</div>
             <CloseIcon />
@@ -98,7 +109,7 @@ const SwapModal = () => {
                 )}
                 <TokenSelectButton
                   color={asset ? "white" : "rgb(154,200,255)"}
-                  onClick={() => null}
+                  onClick={() => setShowProvidersPopOver(true)}
                 >
                   <ButtonContents>
                     <div className="jutsify-center flex flex items-center gap-1 break-words">
