@@ -16,6 +16,7 @@ export function createViemPublicClients({
   return CHAINS.reduce(
     (prev, cur) => {
       return {
+        // biome-ignore lint/performance/noAccumulatingSpread: <explanation>
         ...prev,
         [cur.id]: createPublicClient({
           chain: cur,
