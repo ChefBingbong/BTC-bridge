@@ -29,50 +29,46 @@ export const Navbar = () => {
   }, [disconnect]);
 
   return (
-    <Wrapper>
-      <Nav>
-        <Box>
-          <BoxItemContainer allignment={"flex-start"}>
-            <div className="mx-5 flex h-full items-center gap-2 ">
-              <Image alt="" src="/gardenLogo.svg" width={120} height={120} />
-            </div>
+    <Nav>
+      <Box>
+        <BoxItemContainer allignment={"flex-start"}>
+          <div className="mx-5 flex h-full items-center gap-2 ">
+            <Image alt="" src="/gardenLogo.svg" width={120} height={120} />
+          </div>
 
-            <NavLinks routes={ROUTES} />
-          </BoxItemContainer>
+          <NavLinks routes={ROUTES} />
+        </BoxItemContainer>
 
-          <BoxItemContainer allignment={"flex-end"}>
-            <div className="mr-5 flex  h-full items-center">
-              <PrimaryButton
-                className="mt-[2px] py-[6px] hover:bg-[rgb(249,135,177)]"
-                onClick={async () => {
-                  !active ? enableConnection() : closeConnection();
-                }}
-              >
-                <span className="mr-2 hidden bg-transparent xs:block">
-                  {active ? shortenAddress(account) : "Connect"}
-                </span>
+        <BoxItemContainer allignment={"flex-end"}>
+          <div className="mr-5 flex  h-full items-center">
+            <PrimaryButton
+              className="mt-[2px] py-[6px] hover:bg-[rgb(249,135,177)]"
+              onClick={async () => {
+                !active ? enableConnection() : closeConnection();
+              }}
+            >
+              <span className="mr-2 hidden bg-transparent xs:block">
+                {active ? shortenAddress(account) : "Connect"}
+              </span>
 
-                {active && (
-                  <>
-                    <span className="mr-2 hidden bg-transparent xs:block">
-                      |
-                    </span>
-                    <Image
-                      src="/svgs/metamask-fox.svg"
-                      alt="Alert Image"
-                      height={16}
-                      width={16}
-                      unoptimized
-                      className="bg-transparent"
-                    />
-                  </>
-                )}
-              </PrimaryButton>
-            </div>
-          </BoxItemContainer>
-        </Box>
-      </Nav>
-    </Wrapper>
+              {active && (
+                <>
+                  <span className="mr-2 hidden bg-transparent xs:block">|</span>
+                  <Image
+                    src="/svgs/metamask-fox.svg"
+                    alt="Alert Image"
+                    height={16}
+                    width={16}
+                    unoptimized
+                    className="bg-transparent"
+                  />
+                </>
+              )}
+            </PrimaryButton>
+          </div>
+        </BoxItemContainer>
+      </Box>
+    </Nav>
   );
 };
 

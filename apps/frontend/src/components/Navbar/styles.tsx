@@ -1,15 +1,5 @@
 import styled from "styled-components";
 
-export const Wrapper = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
-  justify-content: space-between;
-  position: fixed;
-  top: 0px;
-  z-index: 100;
-`;
-
 export const Nav = styled.nav`
   padding: 24px 16px;
   width: 100%;
@@ -28,11 +18,11 @@ export const Box = styled.div`
   height: 100%;
 `;
 
-export const BoxItemContainer = styled.div`
+export const BoxItemContainer = styled.div<{ allignment: string }>`
   box-sizing: border-box;
   vertical-align: initial;
   -webkit-tap-highlight-color: transparent;
-  justify-content: ${(props: any) => props.allignment};
+  justify-content: ${({ allignment }: { allignment: string }) => allignment};
   display: flex;
   flex-grow: 1;
   flex-shrink: 1;
