@@ -279,11 +279,12 @@ export const BridgeModalContainer = styled.div`
   background-color: rgb(184, 152, 233);
   text-align: right;
   padding: 12px 12px;
-  border: 1px solid rgb(204, 182, 253);
+  //   border: 1px solid rgb(204, 182, 253);
   border-radius: 20px;
   box-shadow:
-    0 10px 150px rgba(148, 128, 80, 0.1),
-    0 20px 150px rgba(148, 128, 80, 0.1);
+    3px 20px 20px rgba(139, 114, 176, 0.1),
+    10px 20px 20px rgba(139, 114, 176, 0.1),
+    0 10px 30px rgba(139, 114, 176, 0.4);
 
   margin: 30px auto 0;
   transition: height 3s ease-out;
@@ -512,7 +513,7 @@ const SwapModal = () => {
           </ButtonWrapper>
         </BridgeModalContainer>
       </div>
-      <GlowSecondary />
+      {/* <GlowSecondary /> */}
     </>
   );
 };
