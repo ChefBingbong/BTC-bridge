@@ -78,6 +78,9 @@ importers:
       '@pancakeswap/chains':
         specifier: ^0.4.1
         version: 0.4.3
+      '@pancakeswap/sdk':
+        specifier: '5'
+        version: 5.8.3(typescript@5.5.2)(zod@3.23.8)
       '@saas-ui/react':
         specifier: ^2.8.7
         version: 2.8.7(@chakra-ui/react@2.8.2)(@emotion/react@11.11.4)(@emotion/styled@11.11.5)(framer-motion@11.2.11)(react-dom@18.3.1)(react@18.3.1)
@@ -102,6 +105,9 @@ importers:
       react-dom:
         specifier: ^18.3.0
         version: 18.3.1(react@18.3.1)
+      react-feather:
+        specifier: ^2.0.10
+        version: 2.0.10(react@18.3.1)
       styled-components:
         specifier: 6.0.7
         version: 6.0.7(react-dom@18.3.1)(react@18.3.1)
@@ -14520,6 +14526,15 @@ packages:
 
   /react-fast-compare@3.2.2:
     resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
+    dev: false
+
+  /react-feather@2.0.10(react@18.3.1):
+    resolution: {integrity: sha512-BLhukwJ+Z92Nmdcs+EMw6dy1Z/VLiJTzEQACDUEnWMClhYnFykJCGWQx+NmwP/qQHGX/5CzQ+TGi8ofg2+HzVQ==}
+    peerDependencies:
+      react: '>=16.8.6'
+    dependencies:
+      prop-types: 15.8.1
+      react: 18.3.1
     dev: false
 
   /react-focus-lock@2.12.1(@types/react@18.3.3)(react@18.3.1):

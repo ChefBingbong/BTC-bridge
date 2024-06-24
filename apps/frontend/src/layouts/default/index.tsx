@@ -7,7 +7,7 @@ interface DefaultLayoutProps {
 
 function DefaultLayout({ children }: DefaultLayoutProps) {
   return (
-    <div className="flex h-screen w-full flex-col items-center  text-white lg:h-auto lg:min-h-screen">
+    <div className=" flex h-screen w-full flex-col items-center bg-[rgb(216,190,254)]  text-white lg:h-auto lg:min-h-screen">
       <Navbar />
       <div
         id="layout"
