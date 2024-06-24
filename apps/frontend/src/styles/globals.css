@@ -5,6 +5,7 @@
 * {
       font-family: 'Inter', sans-serif;
       box-sizing: border-box;
+      background: rgb(216,190,254)
     }
   
     /**
@@ -47,39 +48,12 @@
     }
   
     /* Use this to apply network-specific gradient backgrounds, in RadialGradientByChainUpdater.ts */
-    #background-radial-gradient {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      pointer-events: none;
-      width: 200vw;
-      height: 200vh;
-      transform: translate(-50vw, -100vh);
-      z-index: -1;
-    }
-  
     html,
     body,
     #root {
       min-height: 100%;
     }
-  
-    @media (prefers-color-scheme: light) {
-      html {
-        /* background-color: black; */
-        /* linear-gradient(180deg, #1b3269 0%, rgb(7, 8, 22) 100%); */
-         background: rgb(19, 22, 38); 
-        
-          /* background: radial-gradient(72.04% 72.04% at 50% 3.99%, #ff37eb 0%, rgba(166, 151, 255, 0) 100%) */
-      }
-    }
-  
-    /* @media (prefers-color-scheme: light) {
-      html {
-        background: radial-gradient(100% 100% at 50% 0%, rgba(255, 184, 226, 0.51) 0%, rgba(255, 255, 255, 0) 100%), #FFFFFF
-      }
-    } */
+
   input[type="radio"]+label span {
     transition: background .2s,
       transform .2s;
