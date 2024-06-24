@@ -97,7 +97,7 @@ const SwapModal = () => {
                   />
                 )}
                 <TokenSelectButton
-                  color={asset ? "white" : "rgb(219,105,147)"}
+                  color={asset ? "white" : "rgb(154,200,255)"}
                   onClick={() => null}
                 >
                   <ButtonContents>
@@ -157,7 +157,7 @@ const SwapModal = () => {
                   />
                 )}
                 <TokenSelectButton
-                  color={feeAsset ? "white" : "rgb(219,105,147)"}
+                  color={feeAsset ? "white" : "rgb(154,200,255)"}
                   onClick={() => null}
                 >
                   <ButtonContents>
@@ -214,7 +214,7 @@ const SwapModal = () => {
                 )}
                 {/* <div className="h-full flex-col items-center justify-center gap-4"> */}
                 <TokenSelectButton
-                  color={toAsset ? "white" : "rgb(219,105,147)"}
+                  color={toAsset ? "white" : "rgb(154,200,255)"}
                   onClick={() => null}
                 >
                   <ButtonContents>

@@ -182,7 +182,7 @@ export const TokenSelectButton = styled.div`
   background-color: ${(props: any) => props.color};
   color: rgb(255, 255, 255);
   cursor: pointer;
-  border: 1px solid rgb(219, 105, 147);
+  border: 1px solid "rgb(174,220,255)";
   border-radius: 16px;
   box-shadow: ${(props: any) =>
     `rgb(0 0 0 / ${props.color === "white" ? "8%" : "20%"}) 0px 6px 10px`};
