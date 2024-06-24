@@ -4,7 +4,6 @@ import { type PublicClient, createPublicClient, fallback, http } from "viem";
 import { mainnet } from "viem/chains";
 
 import { CHAINS } from "./chains";
-import { PUBLIC_NODES } from "./chains";
 
 export type CreatePublicClientParams = {
   transportSignal?: AbortSignal;
@@ -21,7 +20,7 @@ export function createViemPublicClients({
         [cur.id]: createPublicClient({
           chain: cur,
           transport: fallback(
-            (PUBLIC_NODES[cur.id] as string[]).map((url) =>
+            (cur.rpcUrls.default.http as string[]).map((url) =>
               http(url, {
                 timeout: 10_000,
                 fetchOptions: {
@@ -87,10 +86,9 @@ export const publicClient = ({ chainId }: { chainId?: ChainId }) => {
   if (process.env.NODE_ENV === "test" && chainId === mainnet.id) {
     httpString = PUBLIC_MAINNET;
   } else {
-    httpString =
-      chainId && first(PUBLIC_NODES[chainId])
-        ? first(PUBLIC_NODES[chainId])
-        : undefined;
+    const nodeRpc = CHAINS.find((chain) => chain.id === chainId)?.rpcUrls
+      .default.http;
+    httpString = chainId && first(nodeRpc) ? first(nodeRpc) : undefined;
   }
 
   const chain = CHAINS.find((c) => c.id === chainId);

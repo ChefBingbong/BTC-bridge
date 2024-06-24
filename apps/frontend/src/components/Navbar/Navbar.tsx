@@ -41,10 +41,10 @@ export const Navbar = () => {
         </BoxItemContainer>
 
         <BoxItemContainer allignment={"flex-end"}>
-          <div className="mr-12 flex h-full items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <ChainSelect />
           </div>
-          <div className="mr-5 flex  h-full items-center">
+          <div className="mx-5 flex  h-full items-center">
             <PrimaryButton
               className=" py-[6px] hover:bg-[rgb(249,135,177)]"
               onClick={async () => {

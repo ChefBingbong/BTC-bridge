@@ -1,6 +1,6 @@
 import { createConfig, fallback, http } from "wagmi";
 import { mainnet } from "wagmi/chains";
-import { CHAINS, PUBLIC_NODES } from "./chains";
+import { CHAINS } from "./chains";
 
 import type { Transport } from "viem";
 import { injected } from "wagmi/connectors";
@@ -30,7 +30,9 @@ export const transports = chains.reduce(
     if (process.env.NODE_ENV === "test" && chain.id === mainnet.id) {
       httpStrings = [PUBLIC_MAINNET];
     } else {
-      httpStrings = PUBLIC_NODES[chain.id] ? PUBLIC_NODES[chain.id] : [];
+      const nodeRpc = CHAINS.find((c) => c.id === chain.id)?.rpcUrls.default
+        .http;
+      httpStrings = nodeRpc ? nodeRpc : [];
     }
 
     if (ts && httpStrings) {
