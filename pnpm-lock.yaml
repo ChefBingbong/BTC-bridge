@@ -72,6 +72,9 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@iconscout/react-unicons':
+        specifier: ^2.0.2
+        version: 2.0.2(react@18.3.1)
       '@pancakeswap/chains':
         specifier: ^0.4.1
         version: 0.4.3
@@ -4627,6 +4630,14 @@ packages:
   /@iarna/toml@2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
     dev: true
+
+  /@iconscout/react-unicons@2.0.2(react@18.3.1):
+    resolution: {integrity: sha512-0HRi/sZaSQf9OMjlKypWfkyh7R4fknxJeKmDpRdtfjnTM21qzzmmYYZ7p1qzw+VmEyqNdFoQP89oLmW5pcyIoA==}
+    peerDependencies:
+      react: '>=15.0.0 <17.0.0'
+    dependencies:
+      react: 18.3.1
+    dev: false
 
   /@isaacs/cliui@8.0.2:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}

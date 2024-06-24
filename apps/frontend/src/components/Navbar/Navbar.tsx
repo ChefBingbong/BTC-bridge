@@ -4,6 +4,9 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
+import PrimaryButton from "../Button/PrimaryButton/PrimaryButton";
+import { shortenAddress } from "~/utils/misc";
+import { UilAngleDown } from "@iconscout/react-unicons";
 
 export const Wrapper = styled.div`
   display: flex;
@@ -78,9 +81,9 @@ const NavLinks = ({ routes }: { routes: string[] }) => {
 export const Navbar = () => {
   const [isNavbarDark, setIsNavbarDark] = useState(false);
   const { address: account, isConnected: active } = useAccount();
-  const { connectors, connect } = useConnect();
+  const { connectAsync, connectors } = useConnect();
+
   const { disconnect } = useDisconnect();
-  const { push } = useRouter();
 
   const changeBackground = () => {
     if (window.scrollY >= 66) {
@@ -90,9 +93,15 @@ export const Navbar = () => {
     }
   };
 
-  const enableConnection = useCallback(() => {
-    connect({ connector: connectors[0] });
-  }, [connect, connectors]);
+  const enableConnection = useCallback(async () => {
+    if (!connectors[0]) return;
+    try {
+      const connected = await connectAsync({ connector: connectors[0] });
+      return connected;
+    } catch (error) {
+      console.error(error);
+    }
+  }, [connectors, connectAsync]);
 
   const closeConnection = useCallback(() => {
     disconnect();
@@ -118,28 +127,32 @@ export const Navbar = () => {
 
           <BoxItemContainer allignment={"flex-end"}>
             <div className="mr-5 flex  h-full items-center">
-              {/* <PrimaryButton
-                className="mt-[2px] bg-[rgb(116,132,224)] py-[6px] hover:bg-[rgb(136,152,244)]"
+              <PrimaryButton
+                className="mt-[2px] py-[6px] hover:bg-[rgb(249,135,177)]"
                 onClick={async () => {
                   !active ? enableConnection() : closeConnection();
                 }}
               >
-                <span className="xs:block mr-2 hidden">
+                <span className="mr-2 hidden bg-transparent xs:block">
                   {active ? shortenAddress(account) : "Connect"}
                 </span>
-                <span className="xs:block mr-2 hidden">|</span>
-                {active ? (
-                  <Image
-                    src={MetamaskIcon}
-                    alt="Alert Image"
-                    height={16}
-                    width={16}
-                    unoptimized
-                  />
-                ) : (
-                  <UilAngleDown className={"h-5 w-5"} />
+
+                {active && (
+                  <>
+                    <span className="mr-2 hidden bg-transparent xs:block">
+                      |
+                    </span>
+                    <Image
+                      src="/svgs/metamask-fox.svg"
+                      alt="Alert Image"
+                      height={16}
+                      width={16}
+                      unoptimized
+                      className="bg-transparent"
+                    />
+                  </>
                 )}
-              </PrimaryButton> */}
+              </PrimaryButton>
             </div>
           </BoxItemContainer>
         </Box>

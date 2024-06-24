@@ -10,6 +10,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@iconscout/react-unicons": "^2.0.2",
     "@pancakeswap/chains": "^0.4.1",
     "@saas-ui/react": "^2.8.7",
     "@t3-oss/env-nextjs": "^0.10.1",

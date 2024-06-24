@@ -63,7 +63,7 @@ export const CLIENT_CONFIG = {
 export function createWagmiConfig() {
   return createConfig({
     chains,
-    ssr: true,
+    // ssr: true,
     syncConnectedChain: true,
     transports,
     ...CLIENT_CONFIG,
