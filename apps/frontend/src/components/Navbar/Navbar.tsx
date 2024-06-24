@@ -6,6 +6,7 @@ import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { shortenAddress } from "~/utils/misc";
 import PrimaryButton from "../Button/PrimaryButton/PrimaryButton";
 import { Box, BoxItemContainer, Nav, Wrapper } from "./styles";
+import ChainSelect from "./ChainSelect";
 
 const ROUTES: string[] = ["swap"];
 
@@ -40,9 +41,12 @@ export const Navbar = () => {
         </BoxItemContainer>
 
         <BoxItemContainer allignment={"flex-end"}>
+          <div className="mr-12 flex h-full items-center justify-center">
+            <ChainSelect />
+          </div>
           <div className="mr-5 flex  h-full items-center">
             <PrimaryButton
-              className="mt-[2px] py-[6px] hover:bg-[rgb(249,135,177)]"
+              className=" py-[6px] hover:bg-[rgb(249,135,177)]"
               onClick={async () => {
                 !active ? enableConnection() : closeConnection();
               }}

@@ -3,11 +3,9 @@ import Navbar from "~/components/Navbar/Navbar";
 import styled from "styled-components";
 
 export const GlowSecondary = styled.div<{ top: number; right: number }>`
-  position: absolute;
   top: ${({ top }: { top: number }) => top}%;
   right: ${({ right }: { right: number }) => right}%;
 
-  //   bottom: 0;
   background: rgb(254, 215, 155);
   background: radial-gradient(
     circle,
@@ -15,12 +13,12 @@ export const GlowSecondary = styled.div<{ top: number; right: number }>`
     rgba(254, 215, 155, 0.9500393907563025) 81%,
     rgba(29, 138, 191, 0) 97%
   );
-  filter: blur(100px);
+  filter: blur(150px);
   // z-index: -10;
-  width: 600px;
+  width: 450px;
   border-radius: 50%;
   overflow: hidden;
-  height: 600px;
+  height: 450px;
 `;
 
 export const GlowContainer = styled.div<{ top: number; right: number }>`
@@ -28,10 +26,6 @@ export const GlowContainer = styled.div<{ top: number; right: number }>`
   top: ${({ top }: { top: number }) => top}%;
   right: ${({ right }: { right: number }) => right}%;
 
-  //   bottom: 0;
-  // background: #ffffff5;
-
-  // z-index: -10;
   width: 550px;
   border-radius: 50%;
   overflow: hidden;
@@ -43,13 +37,16 @@ interface DefaultLayoutProps {
 
 function DefaultLayout({ children }: DefaultLayoutProps) {
   return (
-    <div className=" flex h-screen w-full flex-col items-center overflow-hidden bg-[rgb(216,190,254)]  text-white ">
+    <div className=" relative flex h-screen w-screen flex-col items-center overflow-hidden bg-[rgb(216,190,254)]  text-white ">
       <Navbar />
       <GlowContainer right={-15} top={-25}>
         <GlowSecondary right={-15} top={-20} />
       </GlowContainer>
 
-      <div id="layout" className=" z-50 w-full w-full flex-1 items-center ">
+      <div
+        id="layout"
+        className=" relative w-full flex-1 items-center overflow-hidden "
+      >
         <GlowContainer right={80} top={74}>
           <GlowSecondary right={-3} top={15} />
         </GlowContainer>
