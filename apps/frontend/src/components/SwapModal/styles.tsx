@@ -135,7 +135,7 @@ export const Button = styled.div`
 
 export const ButtonWrapper = styled.div`
   font-family: "Open Sans", sans-serif;
-  margin-top: 10px;
+  margin-top: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -248,7 +248,9 @@ export const ButtonContents = styled.span`
 `;
 
 export const BridgeModalContainer = styled.div`
-  max-width: 480px;
+  min-width: 480px;
+  width: 445px;
+
   color: White;
   background-color: rgb(184, 152, 233);
   text-align: right;
@@ -259,10 +261,11 @@ export const BridgeModalContainer = styled.div`
     3px 20px 20px rgba(139, 114, 176, 0.1),
     10px 20px 20px rgba(139, 114, 176, 0.1),
     0 10px 30px rgba(139, 114, 176, 0.4);
-  margin: 30px auto 0;
+  //   margin: 30px auto 0;
   transition: height 3s ease-out;
   position: relative;
   overflow: hidden;
+  //   width: fit-content;
 `;
 
 export const NetworkItem = styled.div<{ selected: boolean }>`
