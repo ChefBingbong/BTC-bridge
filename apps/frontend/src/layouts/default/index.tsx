@@ -1,6 +1,7 @@
 import type React from "react";
 import Navbar from "~/components/Navbar/Navbar";
 import styled from "styled-components";
+import BottomNavBar from "~/components/Navbar/BottomNavBar";
 
 export const GlowSecondary = styled.div<{ top: number; right: number }>`
   top: ${({ top }: { top: number }) => top}%;
@@ -39,6 +40,8 @@ function DefaultLayout({ children }: DefaultLayoutProps) {
   return (
     <div className=" relative flex h-screen w-screen flex-col items-center overflow-hidden bg-[rgb(216,190,254)]  text-white ">
       <Navbar />
+      <BottomNavBar />
+
       <GlowContainer right={-15} top={-25}>
         <GlowSecondary right={-15} top={-20} />
       </GlowContainer>
