@@ -13,7 +13,7 @@ const StyledIdenticon = styled.div<{ iconSize: number }>`
 
 export default function Identicon({ size }: { size?: number }) {
   const { address: account } = useAccount();
-  const iconSize = size ?? 24;
+  const iconSize = size ?? 18;
 
   const icon = useMemo(
     () =>

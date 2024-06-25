@@ -24,6 +24,7 @@ import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
 import { useCurrency } from "~/hooks/useCurrency";
 import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
 import { useTokenBalance } from "~/hooks/useBalance";
+import { ChainLogo } from "../CurrencyLogo/ChainLogo";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -102,7 +103,7 @@ const SwapModal = () => {
   }, [toAsset, asset]);
   return (
     <>
-      <div className="   mt-[50px] flex  items-center justify-center">
+      <div className="   mt-[60px] flex  items-center justify-center">
         <div className="z-10 flex w-[70%] items-center justify-center gap-8">
           <BridgeModalContainer>
             {/* <CurrencySelectPopOver
@@ -161,6 +162,19 @@ const SwapModal = () => {
                         {asset && (
                           <div className="relative h-6 w-6">
                             <CurrencyLogo currency={asset} size="24px" />
+
+                            {asset?.chainId !== 0 && (
+                              <ChainLogo
+                                chainId={asset.chainId}
+                                style={{
+                                  position: "absolute",
+                                  left: "50%",
+                                  top: "40%",
+                                  height: "18px",
+                                  width: "18px",
+                                }}
+                              />
+                            )}
                           </div>
                         )}
 
@@ -214,6 +228,19 @@ const SwapModal = () => {
                         {feeAsset && (
                           <div className="relative h-6 w-6">
                             <CurrencyLogo currency={feeAsset} size="24px" />
+
+                            {feeAsset?.chainId !== 0 && (
+                              <ChainLogo
+                                chainId={feeAsset.chainId}
+                                style={{
+                                  position: "absolute",
+                                  left: "50%",
+                                  top: "40%",
+                                  height: "18px",
+                                  width: "18px",
+                                }}
+                              />
+                            )}
                           </div>
                         )}
                         <SelectedToken
@@ -266,6 +293,19 @@ const SwapModal = () => {
                         {toAsset && (
                           <div className="relative h-6 w-6">
                             <CurrencyLogo currency={toAsset} size="24px" />
+
+                            {toAsset?.chainId !== 0 && (
+                              <ChainLogo
+                                chainId={toAsset.chainId}
+                                style={{
+                                  position: "absolute",
+                                  left: "50%",
+                                  top: "40%",
+                                  height: "18px",
+                                  width: "18px",
+                                }}
+                              />
+                            )}
                           </div>
                         )}
                         <SelectedToken

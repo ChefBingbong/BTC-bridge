@@ -66,8 +66,8 @@ export const BottomNavBar = () => {
               <div className="flex items-center gap-2 hover:cursor-pointer">
                 <Image
                   src="/svgs/github.svg"
-                  width={24}
-                  height={24}
+                  width={25}
+                  height={25}
                   alt="github"
                   className={"text-white"}
                 />

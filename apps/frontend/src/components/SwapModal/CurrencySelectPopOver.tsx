@@ -7,6 +7,8 @@ import { NetworkItem } from "./styles";
 import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
 import { BoxItemContainer } from "../Navbar/styles";
 import { Currency } from "@pancakeswap/sdk";
+import { ChainLogo } from "../CurrencyLogo/ChainLogo";
+import { chains } from "~/config/wagmiConfig";
 
 const TokenSearchBar = ({
   searchTerm,
@@ -102,6 +104,10 @@ export const CurrencySelectPopOver = ({
             token.symbol,
             asset?.symbol,
           );
+          const network =
+            token.chainId === 0
+              ? "Bitcoin Network"
+              : chains.find((c) => c.id === token.chainId)?.name;
           return (
             <NetworkItem
               key={`${token.symbol}${token.chainId}${index}`}
@@ -117,13 +123,34 @@ export const CurrencySelectPopOver = ({
               }
             >
               <div className=" coingrid-scrollbar my-[5px] flex items-center justify-start">
-                <CurrencyLogo currency={token} size="28px" />
+                <div className="relative h-8 w-8">
+                  <CurrencyLogo currency={token} size="28px" />
 
+                  {token.chainId !== 0 && (
+                    <ChainLogo
+                      chainId={token.chainId}
+                      style={{
+                        position: "absolute",
+                        left: "50%",
+                        top: "40%",
+                        height: "18px",
+                        width: "18px",
+                      }}
+                    />
+                  )}
+                </div>
                 <div className="flex flex-col items-start justify-center">
                   <Text pl="12px">{token.symbol}</Text>
-                  <Text pl="12px" fontSize="13px">
-                    {token.name}
-                  </Text>
+                  <div className="flex  items-start justify-center gap-1">
+                    {/* <Text pl="12px" fontSize="13px">
+                      {token.name}
+                    </Text> */}
+                    <Text
+                      pl="12px"
+                      color="rgba(255,255,255,0.7)"
+                      fontSize="13px"
+                    >{`on ${network}`}</Text>
+                  </div>
                 </div>
               </div>
 
