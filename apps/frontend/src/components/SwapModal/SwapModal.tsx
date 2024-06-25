@@ -1,11 +1,15 @@
-// import UniswapLogoPink from "../../../public/svgs/";
-// import UniswapLogo from "../../../public/svgs/assets/uniswapPink.svg";
 import { UilAngleDown, UilCopy } from "@iconscout/react-unicons";
-import { Currency, ERC20Token } from "@pancakeswap/sdk";
+import type { Currency } from "@pancakeswap/sdk";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { ChevronDown } from "react-feather";
+import { useAccount } from "wagmi";
+import { useTokenBalance } from "~/hooks/useBalance";
+import { NativeBtc } from "~/state/NativeBtc";
 import PrimaryButton from "../Button/PrimaryButton/PrimaryButton";
+import { ChainLogo } from "../CurrencyLogo/ChainLogo";
+import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
+import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
 import {
   ArrowDownContainer,
   BridgeModalContainer,
@@ -20,11 +24,6 @@ import {
   TokenSelectButton,
   TransactionsContainer,
 } from "./styles";
-import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
-import { useCurrency } from "~/hooks/useCurrency";
-import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
-import { useTokenBalance } from "~/hooks/useBalance";
-import { ChainLogo } from "../CurrencyLogo/ChainLogo";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -48,37 +47,30 @@ export enum ConfirmModalState {
 }
 
 const SwapModal = () => {
-  const [swapState, setSwapState] = useState(true);
+  const { address: account } = useAccount();
   const [inputValue, setInputValue] = useState("");
   const [type, setType] = useState<"ASSET" | "FEE" | "TO" | "">("");
   const [showProivdersPopOver, setShowProvidersPopOver] =
     useState<boolean>(false);
 
-  const [asset, setAsset] = useState<ERC20Token | undefined>(
-    new ERC20Token(
-      97,
-      "0x6F451Eb92d7dE92DdF6939d9eFCE6799246B3a4b",
-      18,
-      "BUSD",
-    ),
-  );
+  const [asset, setAsset] = useState<Currency | undefined>(NativeBtc.onChain());
 
-  const [feeAsset, setFeeAsset] = useState<ERC20Token | undefined>(undefined);
-  const [toAsset, setToAsset] = useState<ERC20Token | undefined>(undefined);
-  const [activeAsset, setActiveAsset] = useState<ERC20Token | undefined>(
+  const [feeAsset, setFeeAsset] = useState<Currency | undefined>(undefined);
+  const [toAsset, setToAsset] = useState<Currency | undefined>(undefined);
+  const [activeAsset, setActiveAsset] = useState<Currency | undefined>(
     undefined,
   );
 
-  const { balance: assetBalance } = useTokenBalance(asset);
-  const { balance: feeAssetBalance } = useTokenBalance(toAsset);
-  const { balance: toAssetBalance } = useTokenBalance(feeAsset);
+  const { balance: assetBalance } = useTokenBalance(asset?.wrapped);
+  const { balance: feeAssetBalance } = useTokenBalance(toAsset?.wrapped);
+  const { balance: toAssetBalance } = useTokenBalance(feeAsset?.wrapped);
 
   const handleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
   }, []);
 
   const handleAssetChange = useCallback(
-    (currency: ERC20Token, type: "ASSET" | "FEE" | "TO") => {
+    (currency: Currency | undefined, type: "ASSET" | "FEE" | "TO") => {
       if (type === "ASSET") setAsset(currency);
       if (type === "TO") setToAsset(currency);
       if (type === "FEE") setFeeAsset(currency);
@@ -87,7 +79,7 @@ const SwapModal = () => {
   );
 
   const handleOpenCurrencyPopover = useCallback(
-    (type: "ASSET" | "FEE" | "TO", activeAsset: ERC20Token) => {
+    (type: "ASSET" | "FEE" | "TO", activeAsset: Currency | undefined) => {
       setType(type);
       setActiveAsset(activeAsset);
       setShowProvidersPopOver(true);
@@ -128,7 +120,7 @@ const SwapModal = () => {
               </ArrowDownContainer>
             </div>
             <TokenAmountWrapper
-              height={swapState === true ? "100px" : "70px"}
+              height="100px"
               marginTop={"12px"}
               marginBottom={"0px"}
               borderTrue={true}
@@ -143,7 +135,7 @@ const SwapModal = () => {
                     type="number"
                   />
 
-                  {asset && (
+                  {!asset?.isNative && (
                     <UilCopy
                       className="ml-2 h-8 w-8 text-gray-400 hover:cursor-pointer"
                       onClick={async () => {
@@ -201,7 +193,7 @@ const SwapModal = () => {
               </div>
             </TokenAmountWrapper>
             <TokenAmountWrapper
-              height={swapState === false ? "100px" : "100px"}
+              height="100px"
               marginTop={"7px"}
               marginBottom={"0px"}
               borderTrue={false}
@@ -209,7 +201,7 @@ const SwapModal = () => {
               <div className="h-full flex-col items-center justify-center ">
                 <InfoWrapper>
                   <TokenInput placeholder={"0.0"} disabled value={""} />
-                  {feeAsset && (
+                  {!feeAsset?.isNative && (
                     <UilCopy
                       className="ml-2 h-8 w-8 text-gray-400 hover:cursor-pointer"
                       onClick={async () => {
@@ -265,7 +257,7 @@ const SwapModal = () => {
               </div>
             </TokenAmountWrapper>
             <TokenAmountWrapper
-              height={swapState === false ? "100px" : "100px"}
+              height="100px"
               marginTop={"7px"}
               marginBottom={"0px"}
               borderTrue={false}
@@ -273,7 +265,7 @@ const SwapModal = () => {
               <div className="h-full flex-col items-center justify-center ">
                 <InfoWrapper>
                   <TokenInput placeholder={"0.0"} disabled value="" />
-                  {toAsset && (
+                  {!toAsset?.isNative && (
                     <UilCopy
                       className="ml-2 h-8 w-8 text-gray-400 hover:cursor-pointer"
                       onClick={async () => {
@@ -332,11 +324,15 @@ const SwapModal = () => {
 
             <ButtonWrapper>
               <PrimaryButton
-                className="w-full items-center justify-center rounded-[20px] py-4 font-semibold hover:bg-[rgb(229,115,157)]"
-                disabled={false}
+                className="w-full items-center justify-center rounded-[16px] py-4 font-semibold hover:bg-[rgb(229,115,157)]"
+                disabled={!account}
                 onClick={() => null}
               >
-                Enter An Amount
+                {!account
+                  ? "Connect Wallet"
+                  : inputValue !== ""
+                    ? `Swap ${inputValue} ${asset?.symbol}`
+                    : "Enter An Amount"}
               </PrimaryButton>
             </ButtonWrapper>
           </BridgeModalContainer>

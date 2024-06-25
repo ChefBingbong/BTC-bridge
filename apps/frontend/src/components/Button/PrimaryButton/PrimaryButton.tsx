@@ -18,7 +18,7 @@ export const PrimaryButton = ({
 }: Props) => {
   return (
     <button
-      className={`flex items-center rounded-full px-5 text-center text-white ${disabled ? "bg-[rgb(219,105,147, 0.4)]" : "bg-[rgb(219,105,147)]"} ${className} focus-visible:ring-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`}
+      className={`flex items-center rounded-full px-5 text-center text-white ${disabled ? "bg-[rgba(219,105,147,0.5)]" : "bg-[rgb(219,105,147)]"} ${className} focus-visible:ring-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`}
       disabled={disabled || loading}
       {...rest}
     >
