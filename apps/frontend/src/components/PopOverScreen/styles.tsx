@@ -6,7 +6,7 @@ export const FilterdNetworkWrapper = styled(Flex)<{ showPopOver: boolean }>`
   width: 100%;
   background: rgb(184, 152, 233);
   margin: -12px -12px;
-  padding: 12px 12px;
+  //   padding: 12px 12px;
   min-height: 300px;
   display: flex;
   flex-direction: column;
@@ -17,6 +17,7 @@ export const FilterdNetworkWrapper = styled(Flex)<{ showPopOver: boolean }>`
   border-top-right-radius: 24px;
   border-top-left-radius: 24px;
   box-shadow: 6px 20px 12px 8px rgba(74, 74, 104, 0.1);
+  max-height: 85%;
 `;
 export const NetworkFilterOverlay = styled(Flex)<{ showPopOver: boolean }>`
   position: absolute;

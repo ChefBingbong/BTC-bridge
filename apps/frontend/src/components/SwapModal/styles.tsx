@@ -262,3 +262,16 @@ export const BridgeModalContainer = styled.div`
   position: relative;
   overflow: hidden;
 `;
+
+export const NetworkItem = styled.div<{ selected: boolean }>`
+  padding: 0px 16px;
+  //   height: 48px;
+  width: 100%;
+  display: flex;
+
+  &:hover {
+    background-color: rgb(255, 255, 255, 0.2);
+    cursor: pointer;
+  }
+  opacity: ${({ selected }) => (!selected ? 0.8 : 1)};
+`;

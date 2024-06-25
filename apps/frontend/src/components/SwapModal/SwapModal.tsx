@@ -19,6 +19,7 @@ import {
   TokenSelectButton,
 } from "./styles";
 import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
+import { useCurrency } from "~/hooks/useCurrency";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -55,6 +56,8 @@ const SwapModal = () => {
       "BUSD",
     ),
   );
+  const x = useCurrency("WBNB");
+  console.log(x);
   const [feeAsset] = useState<ERC20Token | undefined>(undefined);
   const [toAsset] = useState<ERC20Token | undefined>(undefined);
 
