@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useRef, useState } from "react";
+import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { PopOverScreenContainer } from "../PopOverScreen/PopOverScreen";
 import { Box, Flex, Input, Text } from "@pancakeswap/uikit";
 import { UilTimes, UilSearch } from "@iconscout/react-unicons";
@@ -6,10 +6,15 @@ import { useAllTokens } from "~/hooks/useCurrency";
 import { NetworkItem } from "./styles";
 import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
 import { BoxItemContainer } from "../Navbar/styles";
+import { Currency } from "@pancakeswap/sdk";
 
-const TokenSearchBar = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("");
-
+const TokenSearchBar = ({
+  searchTerm,
+  setSearchTerm,
+}: {
+  searchTerm: string;
+  setSearchTerm: (s: string) => void;
+}) => {
   return (
     <BoxItemContainer allignment="center">
       <div
@@ -33,12 +38,33 @@ export const CurrencySelectPopOver = ({
   setShowProvidersPopOver,
   showProivdersPopOver,
 }: any) => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
   const allTokens = useAllTokens();
   const inputRef = useRef<HTMLInputElement>();
 
   const showProvidersOnClick = useCallback(() => {
     setShowProvidersPopOver((p: boolean) => !p);
   }, [setShowProvidersPopOver]);
+
+  const handleSearch = useCallback(
+    (val: Currency) => {
+      console.log(val.symbol, searchTerm);
+      if (!val) return;
+      return (
+        searchTerm === "" ||
+        val.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        val?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    },
+    [searchTerm],
+  );
+
+  const filteredtTokens = useMemo(() => {
+    return Object.values(allTokens).filter((val) => {
+      return handleSearch(val);
+    });
+  }, [allTokens, handleSearch]);
 
   return (
     <PopOverScreenContainer
@@ -55,13 +81,13 @@ export const CurrencySelectPopOver = ({
         />
       </div>
       <div>
-        <TokenSearchBar />
+        <TokenSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       </div>
       <div className="overflow-y-scroll">
-        {Object.values(allTokens).map((token) => {
+        {filteredtTokens.map((token, index) => {
           return (
             <NetworkItem
-              key={token.chainId}
+              key={`${token.symbol}${token.chainId}${index}`}
               style={{ justifyContent: "space-between" }}
               // onClick={() => {
               //   setActiveChain(allNetworks ? undefined : chain.id)
