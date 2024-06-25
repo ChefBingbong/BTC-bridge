@@ -12,11 +12,13 @@ import {
   ButtonContents,
   ButtonWrapper,
   CloseIcon,
+  GlowSecondary,
   InfoWrapper,
   SelectedToken,
   TokenAmountWrapper,
   TokenInput,
   TokenSelectButton,
+  TransactionsContainer,
 } from "./styles";
 import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
 import { useCurrency } from "~/hooks/useCurrency";
@@ -100,8 +102,8 @@ const SwapModal = () => {
   }, [toAsset, asset]);
   return (
     <>
-      <div className="  mt-[50px] flex items-center  justify-center">
-        <div className="flex w-[70%] items-center justify-center gap-8">
+      <div className="   mt-[50px] flex  items-center justify-center">
+        <div className="z-10 flex w-[70%] items-center justify-center gap-8">
           <BridgeModalContainer>
             {/* <CurrencySelectPopOver
             setShowProvidersPopOver={setShowProvidersPopOver}
@@ -298,17 +300,17 @@ const SwapModal = () => {
               </PrimaryButton>
             </ButtonWrapper>
           </BridgeModalContainer>
-          <div className=" h-[440px] w-[650px] rounded-2xl bg-[rgb(184,152,233)] px-4 py-3">
+          <TransactionsContainer>
             <div className="flex flex-col gap-1">
               <span className="font-semobold text-[18px] text-white">
                 Transactions
               </span>
               <span>nothing here yet.</span>
             </div>
-          </div>
+          </TransactionsContainer>
         </div>
       </div>
-      {/* <GlowSecondary /> */}
+      <GlowSecondary />
     </>
   );
 };

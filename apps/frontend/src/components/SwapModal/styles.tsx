@@ -3,8 +3,8 @@ import { Settings } from "react-feather";
 
 export const GlowSecondary = styled.div`
   position: absolute;
-  top: 20%;
-  left: 41%;
+  top: 15%;
+  left: 35%;
   //   bottom: 0;
   background: rgb(254, 215, 155);
   background: radial-gradient(
@@ -12,11 +12,11 @@ export const GlowSecondary = styled.div`
     rgba(254, 215, 155, 1) 93%,
     rgba(29, 138, 191, 0) 97%
   );
-  filter: blur(100px);
-  z-index: -10;
+  filter: blur(120px);
+  z-index: 1;
   max-width: 300px;
-  width: 50%;
-  height: 50%;
+  width: 70%;
+  height: 30%;
 `;
 export const TokenAmountWrapper = styled.div`
   // width: 100%;
@@ -258,9 +258,9 @@ export const BridgeModalContainer = styled.div`
   //   border: 1px solid rgb(204, 182, 253);
   border-radius: 20px;
   box-shadow:
-    3px 20px 20px rgba(139, 114, 176, 0.1),
-    10px 20px 20px rgba(139, 114, 176, 0.1),
-    0 10px 30px rgba(139, 114, 176, 0.4);
+    10px 10px 20px rgba(169, 134, 206, 0.1),
+    10px 10px 20px rgba(169, 134, 206, 0.1),
+    -20px 10px 30px rgba(169, 134, 206, 0.4);
   //   margin: 30px auto 0;
   transition: height 3s ease-out;
   position: relative;
@@ -268,6 +268,17 @@ export const BridgeModalContainer = styled.div`
   //   width: fit-content;
 `;
 
+export const TransactionsContainer = styled.div`
+  height: 440px;
+  width: 650px;
+  border-radius: 1rem; /* 2xl */
+  background-color: rgb(184, 152, 233);
+  padding: 0.75rem 1rem; /* py-3 px-4 */
+  box-shadow:
+    10px 10px 20px rgba(169, 134, 206, 0.1),
+    10px 10px 20px rgba(169, 134, 206, 0.1),
+    -10px 10px 30px rgba(169, 134, 206, 0.4);
+`;
 export const NetworkItem = styled.div<{ selected: boolean }>`
   padding: 0px 16px;
   //   height: 48px;
