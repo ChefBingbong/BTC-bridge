@@ -37,6 +37,8 @@ const TokenSearchBar = ({
 export const CurrencySelectPopOver = ({
   setShowProvidersPopOver,
   showProivdersPopOver,
+  handleAssetChange,
+  type,
 }: any) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -89,10 +91,10 @@ export const CurrencySelectPopOver = ({
             <NetworkItem
               key={`${token.symbol}${token.chainId}${index}`}
               style={{ justifyContent: "space-between" }}
-              // onClick={() => {
-              //   setActiveChain(allNetworks ? undefined : chain.id)
-              //   onClick()
-              // }}
+              onClick={() => {
+                handleAssetChange(token, type);
+                showProvidersOnClick();
+              }}
               selected={false}
             >
               <div className=" coingrid-scrollbar my-[5px] flex items-center justify-start">

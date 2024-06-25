@@ -182,7 +182,8 @@ export const TokenSelectButton = styled.div`
   background-color: ${(props: any) => props.color};
   color: rgb(255, 255, 255);
   cursor: pointer;
-  border: 1px solid "rgb(174,220,255)";
+  border: ${({ color }: any) =>
+    color !== "white" ? "none" : "1px solid rgb(184, 152, 233)"};
   border-radius: 16px;
   box-shadow: ${(props: any) =>
     `rgb(0 0 0 / ${props.color === "white" ? "8%" : "20%"}) 0px 6px 10px`};
@@ -224,11 +225,12 @@ export const TokenImg = styled.img`
   margin-right: 5px;
 `;
 
-export const SelectedToken = styled.span`
+export const SelectedToken = styled.span<{ color: string }>`
   display: flex;
   margin: 0px 0.25rem;
   font-size: 18px;
   width: max-content;
+  color: ${({ color }) => color};
 `;
 
 export const ChevronDownImg = styled.img`

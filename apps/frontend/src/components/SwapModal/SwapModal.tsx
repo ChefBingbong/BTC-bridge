@@ -1,7 +1,7 @@
 // import UniswapLogoPink from "../../../public/svgs/";
 // import UniswapLogo from "../../../public/svgs/assets/uniswapPink.svg";
 import { UilAngleDown, UilCopy } from "@iconscout/react-unicons";
-import { ERC20Token } from "@pancakeswap/sdk";
+import { Currency, ERC20Token } from "@pancakeswap/sdk";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { ChevronDown } from "react-feather";
@@ -20,6 +20,7 @@ import {
 } from "./styles";
 import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
 import { useCurrency } from "~/hooks/useCurrency";
+import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -45,10 +46,11 @@ export enum ConfirmModalState {
 const SwapModal = () => {
   const [swapState, setSwapState] = useState(true);
   const [inputValue, setInputValue] = useState("");
+  const [type, setType] = useState<"ASSET" | "FEE" | "TO" | "">("");
   const [showProivdersPopOver, setShowProvidersPopOver] =
     useState<boolean>(false);
 
-  const [asset] = useState<ERC20Token | undefined>(
+  const [asset, setAsset] = useState<ERC20Token | undefined>(
     new ERC20Token(
       97,
       "0x6F451Eb92d7dE92DdF6939d9eFCE6799246B3a4b",
@@ -56,14 +58,30 @@ const SwapModal = () => {
       "BUSD",
     ),
   );
-  const x = useCurrency("WBNB");
-  console.log(x);
-  const [feeAsset] = useState<ERC20Token | undefined>(undefined);
-  const [toAsset] = useState<ERC20Token | undefined>(undefined);
+
+  const [feeAsset, setFeeAsset] = useState<ERC20Token | undefined>(undefined);
+  const [toAsset, setToAsset] = useState<ERC20Token | undefined>(undefined);
 
   const handleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
   }, []);
+
+  const handleAssetChange = useCallback(
+    (currency: ERC20Token, type: "ASSET" | "FEE" | "TO") => {
+      if (type === "ASSET") setAsset(currency);
+      if (type === "TO") setToAsset(currency);
+      if (type === "FEE") setFeeAsset(currency);
+    },
+    [],
+  );
+
+  const handleOpenCurrencyPopover = useCallback(
+    (type: "ASSET" | "FEE" | "TO") => {
+      setType(type);
+      setShowProvidersPopOver(true);
+    },
+    [],
+  );
   return (
     <>
       <div className=" mt-[20px] flex flex-col items-center justify-center">
@@ -76,6 +94,8 @@ const SwapModal = () => {
           <CurrencySelectPopOver
             setShowProvidersPopOver={setShowProvidersPopOver}
             showProivdersPopOver={showProivdersPopOver}
+            handleAssetChange={handleAssetChange}
+            type={type}
           />
           <div className="flex justify-between px-2">
             <div>Swap</div>
@@ -112,32 +132,25 @@ const SwapModal = () => {
                 )}
                 <TokenSelectButton
                   color={asset ? "white" : "rgb(154,200,255)"}
-                  onClick={() => setShowProvidersPopOver(true)}
+                  onClick={() => handleOpenCurrencyPopover("ASSET")}
                 >
                   <ButtonContents>
                     <div className="jutsify-center flex flex items-center gap-1 break-words">
                       {asset && (
                         <div className="relative h-6 w-6">
-                          {/* <Icon
-                            chainName={asset.Icon as string}
-                            className="absolute h-6 w-6"
-                          /> */}
-
-                          {/* <Icon
-                            chainName={
-                              ChainIdToRenChain[asset.chainId] as string
-                            }
-                            className="absolute left-[50%] top-[45%] h-[14px] w-[14px] bg-black"
-                          /> */}
+                          <CurrencyLogo currency={asset} size="24px" />
                         </div>
                       )}
 
-                      <SelectedToken initialWidth={asset ? true : false}>
+                      <SelectedToken
+                        initialWidth={asset ? true : false}
+                        color={asset ? "grey" : "white"}
+                      >
                         {asset ? asset.symbol : "From asset"}
                       </SelectedToken>
                     </div>
 
-                    <ChevronDown size={"25px"} />
+                    <ChevronDown size={"25px"} color="grey" />
                   </ButtonContents>
                 </TokenSelectButton>
               </InfoWrapper>
@@ -172,30 +185,23 @@ const SwapModal = () => {
                 )}
                 <TokenSelectButton
                   color={feeAsset ? "white" : "rgb(154,200,255)"}
-                  onClick={() => null}
+                  onClick={() => handleOpenCurrencyPopover("FEE")}
                 >
                   <ButtonContents>
                     <div className="jutsify-center flex flex items-center gap-1 break-words">
                       {feeAsset && (
                         <div className="relative h-6 w-6">
-                          {/* <Icon
-                            chainName={feeAsset.Icon as string}
-                            className="absolute h-6 w-6"
-                          /> */}
-
-                          {/* <Icon
-                            chainName={
-                              ChainIdToRenChain[feeAsset.chainId] as string
-                            }
-                            className="absolute left-[50%] top-[45%] h-[14px] w-[14px] bg-black"
-                          /> */}
+                          <CurrencyLogo currency={feeAsset} size="24px" />
                         </div>
                       )}
-                      <SelectedToken initialWidth={!feeAsset ? true : false}>
+                      <SelectedToken
+                        initialWidth={!feeAsset ? true : false}
+                        color={feeAsset ? "grey" : "white"}
+                      >
                         {feeAsset ? feeAsset.symbol : "Fee asset"}
                       </SelectedToken>
                     </div>
-                    <ChevronDown size={"25px"} />
+                    <ChevronDown size={"25px"} color="grey" />
                   </ButtonContents>
                 </TokenSelectButton>
               </InfoWrapper>
@@ -229,30 +235,23 @@ const SwapModal = () => {
                 {/* <div className="h-full flex-col items-center justify-center gap-4"> */}
                 <TokenSelectButton
                   color={toAsset ? "white" : "rgb(154,200,255)"}
-                  onClick={() => null}
+                  onClick={() => handleOpenCurrencyPopover("TO")}
                 >
                   <ButtonContents>
                     <div className="jutsify-center flex flex items-center gap-1 break-words">
                       {toAsset && (
                         <div className="relative h-6 w-6">
-                          {/* <Icon
-                            chainName={toAsset.Icon as string}
-                            className="absolute h-6 w-6"
-                          /> */}
-
-                          {/* <Icon
-                            chainName={
-                              ChainIdToRenChain[ChainId.ARBITRUM_ONE] as string
-                            }
-                            className="absolute left-[50%] top-[45%] h-[14px] w-[14px] bg-black"
-                          /> */}
+                          <CurrencyLogo currency={toAsset} size="24px" />
                         </div>
                       )}
-                      <SelectedToken initialWidth={toAsset ? true : false}>
+                      <SelectedToken
+                        initialWidth={toAsset ? true : false}
+                        color={toAsset ? "grey" : "white"}
+                      >
                         {toAsset ? toAsset.symbol : "To asset"}
                       </SelectedToken>
                     </div>
-                    <ChevronDown size={"25px"} />
+                    <ChevronDown size={"25px"} color="grey" />
                   </ButtonContents>
                 </TokenSelectButton>
               </InfoWrapper>
