@@ -275,5 +275,5 @@ export const NetworkItem = styled.div<{ selected: boolean }>`
     background-color: rgb(255, 255, 255, 0.2);
     cursor: pointer;
   }
-  opacity: ${({ selected }) => (!selected ? 0.8 : 1)};
+  opacity: ${({ selected }) => (selected ? 0.4 : 1)};
 `;

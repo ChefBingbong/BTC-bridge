@@ -17,7 +17,7 @@ export const FilterdNetworkWrapper = styled(Flex)<{ showPopOver: boolean }>`
   border-top-right-radius: 24px;
   border-top-left-radius: 24px;
   box-shadow: 6px 20px 12px 8px rgba(74, 74, 104, 0.1);
-  max-height: 90%;
+  height: 90%;
 `;
 export const NetworkFilterOverlay = styled(Flex)<{ showPopOver: boolean }>`
   position: absolute;

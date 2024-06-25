@@ -50,6 +50,17 @@ export function CurrencyLogo({
     if (currency.chainId === ChainId.BSC) {
       return <BinanceIcon width={size} style={style} {...props} />;
     }
+    if (currency.chainId === 0) {
+      return (
+        <StyledLogo
+          size={size}
+          srcs={["https://tokens.pancakeswap.finance/images/symbol/wbtc.png"]}
+          width={size}
+          style={style}
+          {...props}
+        />
+      );
+    }
     return (
       <StyledLogo
         size={size}

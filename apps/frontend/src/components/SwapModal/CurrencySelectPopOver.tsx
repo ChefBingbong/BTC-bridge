@@ -2,7 +2,7 @@ import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { PopOverScreenContainer } from "../PopOverScreen/PopOverScreen";
 import { Box, Flex, Input, Text } from "@pancakeswap/uikit";
 import { UilTimes, UilSearch } from "@iconscout/react-unicons";
-import { useAllTokens } from "~/hooks/useCurrency";
+import useNativeCurrency, { useAllTokens } from "~/hooks/useCurrency";
 import { NetworkItem } from "./styles";
 import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
 import { BoxItemContainer } from "../Navbar/styles";
@@ -39,8 +39,12 @@ export const CurrencySelectPopOver = ({
   showProivdersPopOver,
   handleAssetChange,
   type,
+  activeAsset,
+  asset,
+  toAsset,
 }: any) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const native = useNativeCurrency(0 as any);
 
   const allTokens = useAllTokens();
   const inputRef = useRef<HTMLInputElement>();
@@ -63,10 +67,16 @@ export const CurrencySelectPopOver = ({
   );
 
   const filteredtTokens = useMemo(() => {
-    return Object.values(allTokens).filter((val) => {
-      return handleSearch(val);
-    });
-  }, [allTokens, handleSearch]);
+    return [native, ...Object.values(allTokens)]
+      .filter((val) =>
+        type === "FEE"
+          ? val.symbol === "USDT"
+          : activeAsset?.symbol !== val.symbol,
+      )
+      .filter((val) => {
+        return handleSearch(val);
+      });
+  }, [allTokens, handleSearch, native, activeAsset]);
 
   return (
     <PopOverScreenContainer
@@ -87,6 +97,11 @@ export const CurrencySelectPopOver = ({
       </div>
       <div className="overflow-y-scroll">
         {filteredtTokens.map((token, index) => {
+          console.log(
+            token.symbol === asset?.symbol,
+            token.symbol,
+            asset?.symbol,
+          );
           return (
             <NetworkItem
               key={`${token.symbol}${token.chainId}${index}`}
@@ -95,7 +110,11 @@ export const CurrencySelectPopOver = ({
                 handleAssetChange(token, type);
                 showProvidersOnClick();
               }}
-              selected={false}
+              selected={
+                type === "ASSET"
+                  ? token.symbol === toAsset?.symbol
+                  : token.symbol === asset?.symbol
+              }
             >
               <div className=" coingrid-scrollbar my-[5px] flex items-center justify-start">
                 <CurrencyLogo currency={token} size="28px" />

@@ -21,6 +21,7 @@ import {
 import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
 import { useCurrency } from "~/hooks/useCurrency";
 import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
+import { useTokenBalance } from "~/hooks/useBalance";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -61,6 +62,13 @@ const SwapModal = () => {
 
   const [feeAsset, setFeeAsset] = useState<ERC20Token | undefined>(undefined);
   const [toAsset, setToAsset] = useState<ERC20Token | undefined>(undefined);
+  const [activeAsset, setActiveAsset] = useState<ERC20Token | undefined>(
+    undefined,
+  );
+
+  const { balance: assetBalance } = useTokenBalance(asset);
+  const { balance: feeAssetBalance } = useTokenBalance(toAsset);
+  const { balance: toAssetBalance } = useTokenBalance(feeAsset);
 
   const handleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -76,12 +84,20 @@ const SwapModal = () => {
   );
 
   const handleOpenCurrencyPopover = useCallback(
-    (type: "ASSET" | "FEE" | "TO") => {
+    (type: "ASSET" | "FEE" | "TO", activeAsset: ERC20Token) => {
       setType(type);
+      setActiveAsset(activeAsset);
       setShowProvidersPopOver(true);
     },
     [],
   );
+
+  const handleToggleSwapState = useCallback(() => {
+    const currentAsset = asset;
+    const currentToAsset = toAsset;
+    setAsset(currentToAsset);
+    setToAsset(currentAsset);
+  }, [toAsset, asset]);
   return (
     <>
       <div className=" mt-[20px] flex flex-col items-center justify-center">
@@ -95,12 +111,15 @@ const SwapModal = () => {
             setShowProvidersPopOver={setShowProvidersPopOver}
             showProivdersPopOver={showProivdersPopOver}
             handleAssetChange={handleAssetChange}
+            activeAsset={activeAsset}
+            asset={asset}
+            toAsset={toAsset}
             type={type}
           />
           <div className="flex justify-between px-2">
             <div>Swap</div>
             <CloseIcon />
-            <ArrowDownContainer>
+            <ArrowDownContainer onClick={handleToggleSwapState}>
               <UilAngleDown className={"h-6 w-6"} />
             </ArrowDownContainer>
           </div>
@@ -132,7 +151,7 @@ const SwapModal = () => {
                 )}
                 <TokenSelectButton
                   color={asset ? "white" : "rgb(154,200,255)"}
-                  onClick={() => handleOpenCurrencyPopover("ASSET")}
+                  onClick={() => handleOpenCurrencyPopover("ASSET", asset)}
                 >
                   <ButtonContents>
                     <div className="jutsify-center flex flex items-center gap-1 break-words">
@@ -158,9 +177,9 @@ const SwapModal = () => {
               <div className="flex w-full justify-between gap-2  text-gray-500">
                 <div className="overflow-ellipsis text-sm">{"You spend"}</div>
 
-                {/* {asset && (
-                  <div className="overflow-ellipsis text-sm">{`${formatAssetBalance} ${asset?.shortName}`}</div>
-                )} */}
+                {asset && (
+                  <div className="overflow-ellipsis text-sm">{`${assetBalance} ${asset?.symbol}`}</div>
+                )}
               </div>
             </div>
           </TokenAmountWrapper>
@@ -185,7 +204,7 @@ const SwapModal = () => {
                 )}
                 <TokenSelectButton
                   color={feeAsset ? "white" : "rgb(154,200,255)"}
-                  onClick={() => handleOpenCurrencyPopover("FEE")}
+                  onClick={() => handleOpenCurrencyPopover("FEE", feeAsset)}
                 >
                   <ButtonContents>
                     <div className="jutsify-center flex flex items-center gap-1 break-words">
@@ -206,10 +225,12 @@ const SwapModal = () => {
                 </TokenSelectButton>
               </InfoWrapper>
 
-              <div className=" flex w-full justify-between gap-2 text-gray-500">
-                {/* {feeAsset && (
-                  <div className="overflow-ellipsis text-sm">{`${formatFeeAssetBalance} ${feeAsset?.shortName}`}</div>
-                )} */}
+              <div className="flex w-full justify-between gap-2  text-gray-500">
+                <div className="overflow-ellipsis text-sm">{"Fee Asset"}</div>
+
+                {feeAsset && (
+                  <div className="overflow-ellipsis text-sm">{`${feeAssetBalance} ${feeAsset?.symbol}`}</div>
+                )}
               </div>
             </div>
           </TokenAmountWrapper>
@@ -235,7 +256,7 @@ const SwapModal = () => {
                 {/* <div className="h-full flex-col items-center justify-center gap-4"> */}
                 <TokenSelectButton
                   color={toAsset ? "white" : "rgb(154,200,255)"}
-                  onClick={() => handleOpenCurrencyPopover("TO")}
+                  onClick={() => handleOpenCurrencyPopover("TO", toAsset)}
                 >
                   <ButtonContents>
                     <div className="jutsify-center flex flex items-center gap-1 break-words">
@@ -256,10 +277,12 @@ const SwapModal = () => {
                 </TokenSelectButton>
               </InfoWrapper>
 
-              <div className=" flex w-full justify-between gap-2 text-gray-500">
-                {/* {toAsset && (
-                  <div className="overflow-ellipsis text-sm">{`${formatToAssetBalance} ${toAsset?.shortName}`}</div>
-                )} */}
+              <div className="flex w-full justify-between gap-2  text-gray-500">
+                <div className="overflow-ellipsis text-sm">{"You spend"}</div>
+
+                {toAsset && (
+                  <div className="overflow-ellipsis text-sm">{`${toAssetBalance} ${toAsset?.symbol}`}</div>
+                )}
               </div>
             </div>
           </TokenAmountWrapper>

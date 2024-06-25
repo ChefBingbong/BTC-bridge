@@ -9,14 +9,16 @@ import {
   safeGetAddress,
 } from "~/state/lists";
 import { useChainId, useToken as useToken_ } from "wagmi";
+import { NativeBtc } from "~/state/NativeBtc";
 
 export default function useNativeCurrency(
-  overrideChainId?: ChainId,
+  overrideChainId?: ChainId | number,
 ): NativeCurrency {
   const chainId = useChainId();
 
   return useMemo(() => {
     try {
+      if (overrideChainId === 0) return NativeBtc.onChain();
       return Native.onChain(overrideChainId ?? chainId ?? ChainId.BSC);
     } catch (e) {
       return Native.onChain(ChainId.BSC);
