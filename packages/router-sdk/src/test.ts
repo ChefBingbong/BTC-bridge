@@ -34,7 +34,7 @@ console.log(evmWallet)
 
   const garden = new GardenJS(orderbook, wallets)
 
-  const sendAmount = 0.0001 * 1e8
+  const sendAmount = 0.001 * 1e8
   const recieveAmount = (1 - 0.3 / 100) * sendAmount
   // const secret = crypto.randomBytes(32).toString('hex')
   // const secretHash = sha256(secret as any)

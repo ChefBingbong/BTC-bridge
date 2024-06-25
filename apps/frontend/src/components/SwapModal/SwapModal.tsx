@@ -95,7 +95,7 @@ const SwapModal = () => {
   }, [toAsset, asset]);
   return (
     <>
-      <div className="   mt-[60px] flex  items-center justify-center">
+      <div className="   mt-[85px] flex  items-center justify-center">
         <div className="z-10 flex w-[70%] items-center justify-center gap-8">
           <BridgeModalContainer>
             {/* <CurrencySelectPopOver

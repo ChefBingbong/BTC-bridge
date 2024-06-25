@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const FilterdNetworkWrapper = styled(Flex)<{ showPopOver: boolean }>`
   position: absolute;
   width: 100%;
-  background: rgb(184, 152, 233);
+  background: rgb(248, 240, 255);
   margin: -12px -12px;
   //   padding: 12px 12px;
   min-height: 300px;

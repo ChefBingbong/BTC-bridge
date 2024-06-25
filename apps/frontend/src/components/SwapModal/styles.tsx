@@ -248,8 +248,8 @@ export const ButtonContents = styled.span`
 `;
 
 export const BridgeModalContainer = styled.div`
-  min-width: 480px;
-  width: 445px;
+  // min-width: 480px;
+  width: 460px;
 
   color: White;
   background-color: rgb(184, 152, 233);
