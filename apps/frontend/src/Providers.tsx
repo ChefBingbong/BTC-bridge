@@ -3,10 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { WagmiProvider } from "wagmi";
 import { createWagmiConfig } from "~/config/wagmiConfig";
-import {
-  ThemeProvider as NextThemeProvider,
-  useTheme as useNextTheme,
-} from "next-themes";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
 
 const queryClient = new QueryClient();
 

@@ -1,14 +1,15 @@
 import { ERC20Token } from "@pancakeswap/sdk";
 import { type Currency, NativeCurrency, type Token } from "@pancakeswap/sdk";
+import { zeroAddress } from "viem";
 
 // only used as dummy to satify Currency Type
 const WNATIVE_BTC = new ERC20Token(
   0,
-  "0x0000000000000000000000000000000000000000",
+  zeroAddress,
   8,
   "WNATIVE_BTC",
   "Wrapped Native Bitcoin",
-  "https://weth.io",
+  "https://bitcoin.io",
 );
 
 const BTC = { name: "Bitcoin", symbol: "BTC", decimals: 8 } as const;

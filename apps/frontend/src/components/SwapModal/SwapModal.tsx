@@ -324,7 +324,7 @@ const SwapModal = () => {
 
             <ButtonWrapper>
               <PrimaryButton
-                className="w-full items-center justify-center rounded-[16px] py-4 font-semibold hover:bg-[rgb(229,115,157)]"
+                className="w-full items-center justify-center rounded-[15px] py-4 font-semibold hover:bg-[rgb(229,115,157)]"
                 disabled={!account}
                 onClick={() => null}
               >
