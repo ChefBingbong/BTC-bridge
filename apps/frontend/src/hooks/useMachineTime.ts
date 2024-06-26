@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
+import Image from "next/image";
 export function useInterval(
   callback: () => void,
   delay: null | number,
