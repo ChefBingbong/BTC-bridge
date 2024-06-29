@@ -3,6 +3,25 @@ export const smartWalletAbi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: 'address',
+        name: 'previousAdmin',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'newAdmin',
+        type: 'address',
+      },
+    ],
+    name: 'AdminChanged',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: 'address',
         name: 'owner',
@@ -34,6 +53,32 @@ export const smartWalletAbi = [
       },
     ],
     name: 'Approval',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'beacon',
+        type: 'address',
+      },
+    ],
+    name: 'BeaconUpgraded',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint8',
+        name: 'version',
+        type: 'uint8',
+      },
+    ],
+    name: 'Initialized',
     type: 'event',
   },
   {
@@ -129,36 +174,19 @@ export const smartWalletAbi = [
       {
         indexed: true,
         internalType: 'address',
-        name: 'signer',
+        name: 'implementation',
         type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'bytes32',
-        name: 'dataHash',
-        type: 'bytes32',
-      },
-      {
-        indexed: false,
-        internalType: 'bytes',
-        name: 'signature',
-        type: 'bytes',
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'wallet',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'nonce',
-        type: 'uint256',
       },
     ],
-    name: 'WalletOpRecoveryResult',
+    name: 'Upgraded',
     type: 'event',
+  },
+  {
+    inputs: [],
+    name: '__SmartWallet_init',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
     inputs: [
@@ -232,131 +260,67 @@ export const smartWalletAbi = [
       {
         components: [
           {
-            components: [
-              {
-                components: [
-                  {
-                    internalType: 'address',
-                    name: 'token',
-                    type: 'address',
-                  },
-                  {
-                    internalType: 'uint160',
-                    name: 'amount',
-                    type: 'uint160',
-                  },
-                  {
-                    internalType: 'uint48',
-                    name: 'expiration',
-                    type: 'uint48',
-                  },
-                  {
-                    internalType: 'uint48',
-                    name: 'nonce',
-                    type: 'uint48',
-                  },
-                ],
-                internalType: 'struct IWallet.AllowanceOpDetails[]',
-                name: 'details',
-                type: 'tuple[]',
-              },
-              {
-                internalType: 'address',
-                name: 'spender',
-                type: 'address',
-              },
-              {
-                internalType: 'uint256',
-                name: 'sigDeadline',
-                type: 'uint256',
-              },
-            ],
-            internalType: 'struct IWallet.AllowanceOp',
-            name: 'allowanceOp',
-            type: 'tuple',
-          },
-          {
-            components: [
-              {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-              },
-              {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-              },
-              {
-                internalType: 'uint256',
-                name: 'chainId',
-                type: 'uint256',
-              },
-              {
-                internalType: 'bytes',
-                name: 'data',
-                type: 'bytes',
-              },
-            ],
-            internalType: 'struct IWallet.UserOp[]',
-            name: 'userOps',
-            type: 'tuple[]',
-          },
-          {
-            components: [
-              {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
-              },
-              {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
-              },
-              {
-                internalType: 'uint256',
-                name: 'chainId',
-                type: 'uint256',
-              },
-              {
-                internalType: 'bytes',
-                name: 'data',
-                type: 'bytes',
-              },
-            ],
-            internalType: 'struct IWallet.UserOp[]',
-            name: 'bridgeOps',
-            type: 'tuple[]',
-          },
-          {
             internalType: 'address',
-            name: 'wallet',
+            name: 'to',
             type: 'address',
           },
           {
             internalType: 'uint256',
-            name: 'nonce',
+            name: 'amount',
             type: 'uint256',
           },
           {
-            internalType: 'uint256',
-            name: 'chainID',
-            type: 'uint256',
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes',
+          },
+        ],
+        internalType: 'struct IWallet.UserOp[]',
+        name: 'userOps',
+        type: 'tuple[]',
+      },
+      {
+        components: [
+          {
+            components: [
+              {
+                internalType: 'address',
+                name: 'token',
+                type: 'address',
+              },
+              {
+                internalType: 'uint160',
+                name: 'amount',
+                type: 'uint160',
+              },
+              {
+                internalType: 'uint48',
+                name: 'expiration',
+                type: 'uint48',
+              },
+              {
+                internalType: 'uint48',
+                name: 'nonce',
+                type: 'uint48',
+              },
+            ],
+            internalType: 'struct IWallet.AllowanceOpDetails[]',
+            name: 'details',
+            type: 'tuple[]',
+          },
+          {
+            internalType: 'address',
+            name: 'spender',
+            type: 'address',
           },
           {
             internalType: 'uint256',
-            name: 'bridgeChainID',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'sigChainID',
+            name: 'sigDeadline',
             type: 'uint256',
           },
         ],
-        internalType: 'struct IWallet.ECDSAExec',
-        name: '_walletExec',
+        internalType: 'struct IWallet.AllowanceOp',
+        name: 'allowanceOp',
         type: 'tuple',
       },
       {
@@ -382,11 +346,6 @@ export const smartWalletAbi = [
           {
             internalType: 'uint256',
             name: 'amount',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint256',
-            name: 'chainId',
             type: 'uint256',
           },
           {
@@ -432,6 +391,19 @@ export const smartWalletAbi = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'proxiableUUID',
+    outputs: [
+      {
+        internalType: 'bytes32',
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -457,6 +429,37 @@ export const smartWalletAbi = [
     name: 'transferFrom',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'newImplementation',
+        type: 'address',
+      },
+    ],
+    name: 'upgradeTo',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'newImplementation',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    name: 'upgradeToAndCall',
+    outputs: [],
+    stateMutability: 'payable',
     type: 'function',
   },
   {

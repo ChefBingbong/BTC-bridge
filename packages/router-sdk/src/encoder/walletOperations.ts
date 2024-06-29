@@ -32,10 +32,9 @@ export const ABI_PARAMETER = {
   ),
   [OperationType.CREATE_WALLET]: parseAbiItem('function createWallet(address _owner)'),
   [OperationType.EXEC]: parseAbiItem([
-    'function exec(ECDSAExec memory _walletExec, bytes calldata _signature)',
+    'function exec(UserOp[] calldata userOps, AllowanceOp calldata allowanceOp, bytes calldata _signature)',
     'struct AllowanceOp { AllowanceOpDetails[] details; address spender; uint256 sigDeadline; }',
     'struct AllowanceOpDetails { address token; uint160 amount; uint48 expiration; uint48 nonce; }',
-    'struct ECDSAExec { AllowanceOp allowanceOp; UserOp[] userOps; UserOp[] bridgeOps; address wallet; uint256 nonce; uint256 chainID; uint256 bridgeChainID; uint256 sigChainID; }',
     'struct UserOp { address to; uint256 amount; bytes data; }',
   ]),
 

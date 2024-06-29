@@ -18,6 +18,7 @@ import { getPublicClient, getWalletClient } from './provider/walletClient'
 import { ClasicTrade } from './trades/classicTrade'
 import type { ECDSAExecType } from './types/eip712'
 import type {
+  AllowanceOp,
   ClassicTradeOptions,
   PackedAllowance,
   SmartWalletGasParams,
@@ -71,7 +72,7 @@ export abstract class SmartWalletRouter {
       BigInt(config.allowance.t0nonce),
       BigInt(config.allowance.t1nonce),
     ])
-    const smartWalletTypedData = typedMetaTx(userOps, permitData, nonce, 1, chainId, address)
+    const smartWalletTypedData = typedMetaTx(userOps, permitData, nonce, 1n, chainId, address)
     return {
       smartWalletTypedData,
       externalUserOps,
@@ -292,10 +293,10 @@ export abstract class SmartWalletRouter {
     return { to, amount: 1.5 * 10 ** 9, data: operationCalldata }
   }
 
-  public static async encodeSmartRouterTrade(args: [ECDSAExecType, Hex], to: Address, chainId: ChainId) {
+  public static async encodeSmartRouterTrade(args: [UserOp[], AllowanceOp, Hex], to: Address, chainId: ChainId) {
     const provider = getEthersProvider(chainId)
     const smartWalletContract = new ethers.Contract(to, smartWalletAbi, provider)
-    const callData = await smartWalletContract.exec.populateTransaction(args[0], args[1])
+    const callData = await smartWalletContract.exec.populateTransaction(args[0], args[1], args[2])
     return { to, amount: 0n, data: callData.data }
   }
 

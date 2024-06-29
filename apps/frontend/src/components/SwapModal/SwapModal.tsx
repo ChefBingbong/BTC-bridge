@@ -3,7 +3,7 @@ import { CurrencyAmount, type Currency } from "@pancakeswap/sdk";
 import type React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { ChevronDown } from "react-feather";
-import { useAccount, useSignTypedData } from "wagmi";
+import { useAccount, useChainId, useSignTypedData } from "wagmi";
 import { useTokenBalance } from "~/hooks/useBalance";
 import { NativeBtc } from "~/config/NativeBtc";
 import PrimaryButton from "../Button/PrimaryButton/PrimaryButton";
@@ -62,6 +62,7 @@ export enum ConfirmModalState {
 
 const SwapModal = () => {
   const { address, connector } = useAccount();
+  const chainId = useChainId();
   const { signTypedDataAsync } = useSignTypedData();
 
   const [inputValue, setInputValue] = useState("");
@@ -245,7 +246,7 @@ const SwapModal = () => {
       .then(async (signature) => {
         const signatureEncoded = defaultAbiCoder.encode(
           ["uint256", "bytes"],
-          [asset?.chainId, signature],
+          [chainId, signature],
         );
 
         if (values.nonce === 0n) {
@@ -262,7 +263,7 @@ const SwapModal = () => {
           console.log(response);
         }
         const tradeEncoded = await SmartWalletRouter.encodeSmartRouterTrade(
-          [values, signatureEncoded as any],
+          [values.userOps, values.allowanceOp, signatureEncoded as any],
           smartWalletDetails?.address,
           asset.chainId,
         );
