@@ -5,7 +5,7 @@ export const FilterdNetworkWrapper = styled(Flex)<{ showPopOver: boolean }>`
   position: absolute;
   width: 100%;
   background: rgb(184, 152, 233);
-  margin: -12px -12px;
+  margin: 0px -13px;
   //   padding: 12px 12px;
   min-height: 300px;
   display: flex;
@@ -23,7 +23,8 @@ export const NetworkFilterOverlay = styled(Flex)<{ showPopOver: boolean }>`
   position: absolute;
   width: 100%;
   z-index: 9999;
-  margin: -12px -12px;
+  bottom: 0%;
+  margin: 0px -13px;
   border-radius: 18px;
   background-color: rgb(153, 200, 255);
   height: 100%;

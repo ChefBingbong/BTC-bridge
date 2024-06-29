@@ -1,9 +1,9 @@
 import { SaasProvider } from "@saas-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { useMemo } from "react";
 import { WagmiProvider } from "wagmi";
 import { createWagmiConfig } from "~/config/wagmiConfig";
-import { ThemeProvider as NextThemeProvider } from "next-themes";
 
 const queryClient = new QueryClient();
 

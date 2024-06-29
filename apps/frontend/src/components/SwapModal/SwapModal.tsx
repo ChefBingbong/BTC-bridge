@@ -10,6 +10,7 @@ import PrimaryButton from "../Button/PrimaryButton/PrimaryButton";
 import { ChainLogo } from "../CurrencyLogo/ChainLogo";
 import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
 import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
+import { formatAmount } from "~/utils/misc";
 import {
   ArrowDownContainer,
   BridgeModalContainer,
@@ -19,6 +20,7 @@ import {
   GlowSecondary,
   InfoWrapper,
   SelectedToken,
+  TokenAmountContainer,
   TokenAmountWrapper,
   TokenInput,
   TokenSelectButton,
@@ -38,6 +40,10 @@ import {
   UserRejectedRequestError,
 } from "viem";
 import { defaultAbiCoder } from "@ethersproject/abi";
+import { useSwapState, useSwapctionHandlers } from "~/state/swap/hooks";
+import { Field } from "~/state/swap/actions";
+import { useCurrency, useCurrencyWithId } from "~/hooks/useCurrency";
+import { CurrencyInputField } from "./CurrencyInputField";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -65,92 +71,88 @@ const SwapModal = () => {
   const chainId = useChainId();
   const { signTypedDataAsync } = useSignTypedData();
 
-  const [inputValue, setInputValue] = useState("");
-  const [type, setType] = useState<"ASSET" | "FEE" | "TO" | "">("");
-  const [showProivdersPopOver, setShowProvidersPopOver] =
-    useState<boolean>(false);
+  const {
+    typedValue,
+    independentField,
+    inputCurrencyId,
+    feeCurrencyId,
+    outputCurrencyId,
+  } = useSwapState();
 
-  const [asset, setAsset] = useState<Currency | undefined>(NativeBtc.onChain());
+  const inputCurrency = useCurrency(inputCurrencyId);
+  const feeCurrency = useCurrency(feeCurrencyId);
+  const outputCurrency = useCurrency(outputCurrencyId);
 
-  const [feeAsset, setFeeAsset] = useState<Currency | undefined>(undefined);
-  const [toAsset, setToAsset] = useState<Currency | undefined>(undefined);
-  const [activeAsset, setActiveAsset] = useState<Currency | undefined>(
-    undefined,
+  const { onUserInput, onCurrencySelection, onSwitchTokens } =
+    useSwapctionHandlers();
+
+  const handleTypeInput = useCallback(
+    (value: string) => onUserInput(Field.INPUT, value),
+    [onUserInput],
+  );
+  const handleTypeOutput = useCallback(
+    (value: string) => onUserInput(Field.OUTPUT, value),
+    [onUserInput],
   );
 
-  const { balance: assetBalance } = useTokenBalance(asset?.wrapped);
-  const { balance: feeAssetBalance } = useTokenBalance(toAsset?.wrapped);
-  const { balance: toAssetBalance } = useTokenBalance(feeAsset?.wrapped);
-
-  const handleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  }, []);
-
-  const handleAssetChange = useCallback(
-    (currency: Currency | undefined, type: "ASSET" | "FEE" | "TO") => {
-      if (type === "ASSET") setAsset(currency);
-      if (type === "TO") setToAsset(currency);
-      if (type === "FEE") setFeeAsset(currency);
-    },
-    [],
+  const handleInputSelect = useCallback(
+    (newCurrency: Currency) => onCurrencySelection(Field.INPUT, newCurrency),
+    [onCurrencySelection],
   );
-
-  const handleOpenCurrencyPopover = useCallback(
-    (type: "ASSET" | "FEE" | "TO", activeAsset: Currency | undefined) => {
-      setType(type);
-      setActiveAsset(activeAsset);
-      setShowProvidersPopOver(true);
-    },
-    [],
+  const handleFeeSelect = useCallback(
+    (newCurrency: Currency) => onCurrencySelection(Field.FEE, newCurrency),
+    [onCurrencySelection],
+  );
+  const handleOutputSelect = useCallback(
+    (newCurrency: Currency) => onCurrencySelection(Field.OUTPUT, newCurrency),
+    [onCurrencySelection],
   );
 
   const handleToggleSwapState = useCallback(() => {
-    const currentAsset = asset;
-    const currentToAsset = toAsset;
-    setAsset(currentToAsset);
-    setToAsset(currentAsset);
-  }, [toAsset, asset]);
+    onSwitchTokens();
+  }, [onSwitchTokens]);
 
   const amount = useMemo(
     () =>
-      asset
+      inputCurrency && typedValue
         ? CurrencyAmount.fromRawAmount(
-            asset,
-            Number(inputValue) * 10 ** asset?.decimals ?? 18,
+            inputCurrency,
+            Number(typedValue ?? 1) * 10 ** inputCurrency?.decimals ?? 18,
           )
         : undefined,
-    [inputValue, asset],
+    [typedValue, inputCurrency],
   );
 
   const { data: smartWalletDetails, refetch } = useQuery({
-    queryKey: ["smartWalletDetails", address, asset?.chainId ?? 0],
+    queryKey: ["smartWalletDetails", address, inputCurrency?.chainId ?? 0],
     queryFn: async () => {
-      if (!address || !asset?.chainId) return;
+      if (!address || !inputCurrency?.chainId) return;
       return SmartWalletRouter.getUserSmartWalletDetails(
         address,
-        asset.chainId,
+        inputCurrency.chainId,
       );
     },
     retry: false,
     refetchOnWindowFocus: false,
-    enabled: Boolean(address && asset?.chainId),
+    enabled: Boolean(address && inputCurrency?.chainId),
   });
 
   const { data: allowance, refetch: refetchAlloance } = useQuery({
     queryKey: [
       "allowance-query",
-      asset?.symbol,
-      feeAsset?.symbol,
+      inputCurrency?.symbol,
+      feeCurrency?.symbol,
       address,
-      asset?.chainId,
+      inputCurrency?.chainId,
     ],
     queryFn: async () => {
-      if (!asset?.chainId || !address || !amount || !feeAsset) return undefined;
+      if (!inputCurrency?.chainId || !address || !amount || !feeCurrency)
+        return undefined;
 
       return SmartWalletRouter.getContractAllowance(
-        [asset?.wrapped?.address, feeAsset?.wrapped?.address],
+        [inputCurrency?.wrapped?.address, feeCurrency?.wrapped?.address],
         address,
-        asset.chainId,
+        inputCurrency.chainId,
         amount.quotient,
       );
     },
@@ -158,41 +160,67 @@ const SwapModal = () => {
     refetchInterval: 20000,
     retry: false,
     refetchOnWindowFocus: false,
-    enabled: Boolean(address && asset?.chainId && amount && feeAsset?.chainId),
+    enabled: Boolean(
+      address && inputCurrency?.chainId && amount && feeCurrency?.chainId,
+    ),
   });
 
   const { data: trade, isLoading: isFetchingTrade } = useSmartRouterBestTrade({
-    toAsset: toAsset,
-    fromAsset: asset,
-    chainId: asset?.chainId,
+    toAsset: outputCurrency,
+    fromAsset: inputCurrency,
+    chainId: inputCurrency?.chainId,
     account: address,
     amount: amount,
   });
-  // console.log(trade, asset?.chainId);
+
+  const isTypingInput = independentField === Field.INPUT;
+  const inputValue = useMemo(
+    () =>
+      typedValue &&
+      (isTypingInput ? typedValue : formatAmount(trade?.inputAmount) || ""),
+    [typedValue, isTypingInput, trade],
+  );
+  const outputValue = useMemo(
+    () =>
+      typedValue &&
+      (isTypingInput ? formatAmount(trade?.outputAmount) || "" : typedValue),
+    [typedValue, isTypingInput, trade],
+  );
+  const inputLoading = typedValue ? !isTypingInput && isFetchingTrade : false;
+  const outputLoading = typedValue ? isTypingInput && isFetchingTrade : false;
+
+  // console.log(outputValue);
   const { data: fees, isFetching: isFetchingFees } = useQuery({
-    queryKey: ["fees-query", asset?.symbol, toAsset?.symbol, feeAsset?.symbol],
+    queryKey: [
+      "fees-query",
+      inputCurrency?.symbol,
+      outputCurrency?.symbol,
+      feeCurrency?.symbol,
+    ],
     queryFn: async () => {
-      if (!trade || !feeAsset || !asset || !toAsset) return undefined;
+      if (!trade || !feeCurrency || !inputCurrency || !outputCurrency)
+        return undefined;
 
       return SmartWalletRouter.estimateSmartWalletFees({
-        feeAsset: feeAsset?.symbol,
-        inputCurrency: asset,
-        outputCurrency: toAsset,
+        feeCurrency: feeCurrency?.symbol,
+        inputCurrency: inputCurrency,
+        outputCurrency: outputCurrency,
       });
     },
 
     refetchInterval: 10000,
     retry: false,
     refetchOnWindowFocus: false,
-    enabled: Boolean(asset && toAsset && feeAsset && trade),
+    enabled: Boolean(inputCurrency && outputCurrency && feeCurrency && trade),
   });
+  console.log(fees);
 
   const swapCallParams = useMemo(() => {
     if (
       !trade ||
-      !asset ||
-      !feeAsset ||
-      !toAsset ||
+      !inputCurrency ||
+      !feeCurrency ||
+      !outputCurrency ||
       !allowance ||
       !smartWalletDetails ||
       !address
@@ -204,29 +232,37 @@ const SwapModal = () => {
       true,
       allowance,
       smartWalletDetails as never,
-      asset.chainId,
+      inputCurrency.chainId,
       {
-        inputAsset: asset.wrapped?.address,
-        feeAsset: feeAsset.wrapped?.address,
-        outputAsset: toAsset.wrapped?.address,
+        inputAsset: inputCurrency.wrapped?.address,
+        feeAsset: feeCurrency.wrapped?.address,
+        outputAsset: outputCurrency.wrapped?.address,
       },
       RouterTradeType.SmartWalletTradeWithPermit2,
     );
     return SmartWalletRouter.buildSmartWalletTrade(trade, options);
-  }, [trade, address, allowance, smartWalletDetails, asset, feeAsset, toAsset]);
+  }, [
+    trade,
+    address,
+    allowance,
+    smartWalletDetails,
+    inputCurrency,
+    feeCurrency,
+    outputCurrency,
+  ]);
 
   const swap = useCallback(async () => {
-    if (!swapCallParams || !address || !allowance) return;
+    if (!swapCallParams || !address || !allowance || !inputCurrency) return;
 
     const windowClient = await connector?.getClient?.({
-      chainId: asset.chainId,
+      chainId: inputCurrency.chainId,
     });
     const externalOps = swapCallParams.externalUserOps;
 
     if (externalOps.length > 0) {
       for (const externalOp of externalOps) {
         await SmartWalletRouter.sendTransactionFromRelayer(
-          asset.chainId,
+          inputCurrency.chainId,
           externalOp as never,
           {
             externalClient: windowClient as any,
@@ -253,11 +289,11 @@ const SwapModal = () => {
           const walletDeploymentOp =
             await SmartWalletRouter.encodeWalletCreationOp(
               [address],
-              Deployments[asset.chainId].ECDSAWalletFactory as any,
+              Deployments[inputCurrency.chainId].ECDSAWalletFactory as any,
             );
 
           const response = await SmartWalletRouter.sendTransactionFromRelayer(
-            asset.chainId,
+            inputCurrency.chainId,
             walletDeploymentOp as any,
           );
           console.log(response);
@@ -265,7 +301,7 @@ const SwapModal = () => {
         const tradeEncoded = await SmartWalletRouter.encodeSmartRouterTrade(
           [values.userOps, values.allowanceOp, signatureEncoded as any],
           smartWalletDetails?.address,
-          asset.chainId,
+          inputCurrency.chainId,
         );
         console.log(tradeEncoded, values);
 
@@ -275,12 +311,12 @@ const SwapModal = () => {
           RouterTradeType.SmartWalletTradeWithPermit2
         ) {
           response = await SmartWalletRouter.sendTransactionFromRelayer(
-            asset.chainId,
+            inputCurrency.chainId,
             tradeEncoded as any,
           );
         } else {
           response = await SmartWalletRouter.sendTransactionFromRelayer(
-            asset.chainId,
+            inputCurrency.chainId,
             tradeEncoded as any,
             {
               externalClient: windowClient as any,
@@ -288,7 +324,7 @@ const SwapModal = () => {
           );
         }
         console.log(response);
-        setInputValue("");
+        onUserInput(Field.INPUT, "");
         refetch();
 
         return response as TransactionReceipt;
@@ -304,7 +340,7 @@ const SwapModal = () => {
     swapCallParams,
     address,
     signTypedDataAsync,
-    asset.chainId,
+    inputCurrency?.chainId,
     allowance,
     smartWalletDetails,
   ]);
@@ -318,15 +354,13 @@ const SwapModal = () => {
             showProivdersPopOver={showProivdersPopOver}
           /> */}
 
-            <CurrencySelectPopOver
+            {/* <CurrencySelectPopOver
               setShowProvidersPopOver={setShowProvidersPopOver}
               showProivdersPopOver={showProivdersPopOver}
-              handleAssetChange={handleAssetChange}
-              activeAsset={activeAsset}
-              asset={asset}
-              toAsset={toAsset}
-              type={type}
-            />
+              asset={outputCurrency}
+              onCurrencySelect={handleOutputSelect}
+            /> */}
+
             <div className="flex justify-between px-2">
               <div>Swap</div>
               <CloseIcon />
@@ -334,215 +368,24 @@ const SwapModal = () => {
                 <UilAngleDown className={"h-6 w-6"} />
               </ArrowDownContainer>
             </div>
-            <TokenAmountWrapper height="100px" marginTop={"12px"}>
-              <div className="h-full flex-col items-center justify-center gap-4">
-                <InfoWrapper>
-                  <TokenInput
-                    placeholder={"0.0"}
-                    onChange={handleAmount}
-                    value={inputValue}
-                    required
-                    type="number"
-                  />
-
-                  {!asset?.isNative && (
-                    <UilCopy
-                      className="ml-2 h-8 w-8 text-gray-400 hover:cursor-pointer"
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(
-                          asset?.address as string,
-                        );
-                      }}
-                    />
-                  )}
-                  <TokenSelectButton
-                    color={asset ? "white" : "rgb(154,200,255)"}
-                    onClick={() => handleOpenCurrencyPopover("ASSET", asset)}
-                  >
-                    <ButtonContents>
-                      <div className="jutsify-center flex flex items-center gap-1 break-words">
-                        {asset && (
-                          <div className="relative h-6 w-6">
-                            <CurrencyLogo currency={asset} size="24px" />
-
-                            {asset?.chainId !== 0 && (
-                              <ChainLogo
-                                chainId={asset.chainId}
-                                style={{
-                                  position: "absolute",
-                                  left: "50%",
-                                  top: "40%",
-                                  height: "18px",
-                                  width: "18px",
-                                }}
-                              />
-                            )}
-                          </div>
-                        )}
-
-                        <SelectedToken color={asset ? "grey" : "white"}>
-                          {asset ? asset.symbol : "From asset"}
-                        </SelectedToken>
-                      </div>
-
-                      <ChevronDown size={"25px"} color="grey" />
-                    </ButtonContents>
-                  </TokenSelectButton>
-                </InfoWrapper>
-
-                <div className="flex w-full justify-between gap-2  text-gray-500">
-                  <div className="overflow-ellipsis text-sm">{"You spend"}</div>
-
-                  {asset && (
-                    <div className="overflow-ellipsis text-sm">{`${assetBalance} ${asset?.symbol}`}</div>
-                  )}
-                </div>
-              </div>
-            </TokenAmountWrapper>
-            <TokenAmountWrapper height="100px" marginTop={"7px"}>
-              <div className="h-full flex-col items-center justify-center ">
-                <InfoWrapper>
-                  <TokenInput
-                    placeholder={"0.0"}
-                    disabled
-                    value={
-                      fees && inputValue !== ""
-                        ? Number(fees?.gasCostInBaseToken?.toExact()).toFixed(5)
-                        : ""
-                    }
-                  />
-                  {!feeAsset?.isNative && (
-                    <UilCopy
-                      className="ml-2 h-8 w-8 text-gray-400 hover:cursor-pointer"
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(
-                          feeAsset?.address as string,
-                        );
-                      }}
-                    />
-                  )}
-                  <TokenSelectButton
-                    color={feeAsset ? "white" : "rgb(154,200,255)"}
-                    onClick={() => handleOpenCurrencyPopover("FEE", feeAsset)}
-                  >
-                    <ButtonContents>
-                      <div className="jutsify-center flex flex items-center gap-1 break-words">
-                        {feeAsset && (
-                          <div className="relative h-6 w-6">
-                            <CurrencyLogo currency={feeAsset} size="24px" />
-
-                            {feeAsset?.chainId !== 0 && (
-                              <ChainLogo
-                                chainId={feeAsset.chainId}
-                                style={{
-                                  position: "absolute",
-                                  left: "50%",
-                                  top: "40%",
-                                  height: "18px",
-                                  width: "18px",
-                                }}
-                              />
-                            )}
-                          </div>
-                        )}
-                        <SelectedToken color={feeAsset ? "grey" : "white"}>
-                          {feeAsset ? feeAsset.symbol : "Fee asset"}
-                        </SelectedToken>
-                      </div>
-                      <ChevronDown size={"25px"} color="grey" />
-                    </ButtonContents>
-                  </TokenSelectButton>
-                </InfoWrapper>
-
-                <div className="flex w-full justify-between gap-2  text-gray-500">
-                  <div className="flex items-center gap-2 overflow-ellipsis text-sm">
-                    <span>{"fee cost"}</span>
-                    {isFetchingFees ||
-                      (isFetchingTrade && (
-                        <UilSpinner
-                          className={"h-5 w-5 animate-spin text-blue-600"}
-                        />
-                      ))}
-                  </div>
-
-                  {feeAsset && (
-                    <div className="overflow-ellipsis text-sm">{`${feeAssetBalance} ${feeAsset?.symbol}`}</div>
-                  )}
-                </div>
-              </div>
-            </TokenAmountWrapper>
-            <TokenAmountWrapper height="100px" marginTop={"7px"}>
-              <div className="h-full flex-col items-center justify-center ">
-                <InfoWrapper>
-                  <TokenInput
-                    placeholder={"0.0"}
-                    disabled
-                    value={
-                      trade
-                        ? Number(trade?.outputAmount?.toExact()).toFixed(5)
-                        : ""
-                    }
-                  />
-                  {!toAsset?.isNative && (
-                    <UilCopy
-                      className="ml-2 h-8 w-8 text-gray-400 hover:cursor-pointer"
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(
-                          toAsset?.address as string,
-                        );
-                      }}
-                    />
-                  )}
-
-                  <TokenSelectButton
-                    color={toAsset ? "white" : "rgb(154,200,255)"}
-                    onClick={() => handleOpenCurrencyPopover("TO", toAsset)}
-                  >
-                    <ButtonContents>
-                      <div className="jutsify-center flex flex items-center gap-1 break-words">
-                        {toAsset && (
-                          <div className="relative h-6 w-6">
-                            <CurrencyLogo currency={toAsset} size="24px" />
-
-                            {toAsset?.chainId !== 0 && (
-                              <ChainLogo
-                                chainId={toAsset.chainId}
-                                style={{
-                                  position: "absolute",
-                                  left: "50%",
-                                  top: "40%",
-                                  height: "18px",
-                                  width: "18px",
-                                }}
-                              />
-                            )}
-                          </div>
-                        )}
-                        <SelectedToken color={toAsset ? "grey" : "white"}>
-                          {toAsset ? toAsset.symbol : "To asset"}
-                        </SelectedToken>
-                      </div>
-                      <ChevronDown size={"25px"} color="grey" />
-                    </ButtonContents>
-                  </TokenSelectButton>
-                </InfoWrapper>
-
-                <div className="flex w-full justify-between gap-2  text-gray-500">
-                  <div className="flex items-center gap-2 overflow-ellipsis text-sm">
-                    <span>{"You spend"}</span>
-                    {isFetchingTrade && (
-                      <UilSpinner
-                        className={"h-5 w-5 animate-spin text-blue-600"}
-                      />
-                    )}
-                  </div>
-
-                  {toAsset && (
-                    <div className="overflow-ellipsis text-sm">{`${toAssetBalance} ${toAsset?.symbol}`}</div>
-                  )}
-                </div>
-              </div>
-            </TokenAmountWrapper>
+            <CurrencyInputField
+              currency={inputCurrency}
+              onCurrencySelect={handleInputSelect}
+              onTypeInput={handleTypeInput}
+              inputValue={isTypingInput ? typedValue : inputValue}
+            />
+            <CurrencyInputField
+              currency={feeCurrency}
+              onCurrencySelect={handleFeeSelect}
+              onTypeInput={() => null}
+              inputValue={formatAmount(fees?.gasCostInBaseToken) ?? ""}
+            />
+            <CurrencyInputField
+              currency={outputCurrency}
+              onCurrencySelect={handleOutputSelect}
+              onTypeInput={handleTypeOutput}
+              inputValue={isTypingInput ? outputValue : typedValue}
+            />
 
             <ButtonWrapper>
               <PrimaryButton
@@ -552,8 +395,8 @@ const SwapModal = () => {
               >
                 {!address
                   ? "Connect Wallet"
-                  : inputValue !== ""
-                    ? `Swap ${inputValue} ${asset?.symbol}`
+                  : typedValue !== ""
+                    ? `Swap ${typedValue} ${inputCurrency?.symbol}`
                     : "Enter An Amount"}
               </PrimaryButton>
             </ButtonWrapper>

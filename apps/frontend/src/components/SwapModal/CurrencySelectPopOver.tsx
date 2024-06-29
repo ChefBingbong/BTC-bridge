@@ -9,6 +9,7 @@ import { BoxItemContainer } from "../Navbar/styles";
 import { Currency } from "@pancakeswap/sdk";
 import { ChainLogo } from "../CurrencyLogo/ChainLogo";
 import { chains } from "~/config/wagmiConfig";
+import { useSwapctionHandlers } from "~/state/swap/hooks";
 
 const TokenSearchBar = ({
   searchTerm,
@@ -39,11 +40,8 @@ const TokenSearchBar = ({
 export const CurrencySelectPopOver = ({
   setShowProvidersPopOver,
   showProivdersPopOver,
-  handleAssetChange,
-  type,
-  activeAsset,
+  onCurrencySelect,
   asset,
-  toAsset,
 }: any) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const native = useNativeCurrency(0 as any);
@@ -68,16 +66,10 @@ export const CurrencySelectPopOver = ({
   );
 
   const filteredtTokens = useMemo(() => {
-    return [native, ...Object.values(allTokens)]
-      .filter((val) =>
-        type === "FEE"
-          ? val.symbol === "USDT" || val.symbol === "CAKE"
-          : activeAsset?.symbol !== val.symbol,
-      )
-      .filter((val) => {
-        return handleSearch(val);
-      });
-  }, [allTokens, handleSearch, native, activeAsset]);
+    return [native, ...Object.values(allTokens)].filter((val) => {
+      return handleSearch(val);
+    });
+  }, [allTokens, handleSearch, native]);
 
   return (
     <PopOverScreenContainer
@@ -107,14 +99,10 @@ export const CurrencySelectPopOver = ({
               key={`${token.symbol}${token.chainId}${index}`}
               style={{ justifyContent: "space-between" }}
               onClick={() => {
-                handleAssetChange(token, type);
+                onCurrencySelect(token);
                 showProvidersOnClick();
               }}
-              selected={
-                type === "ASSET"
-                  ? token.symbol === toAsset?.symbol
-                  : token.symbol === asset?.symbol
-              }
+              selected={token.symbol === asset?.symbol}
             >
               <div className=" coingrid-scrollbar my-[5px] flex items-center justify-start">
                 <div className="relative h-8 w-8">

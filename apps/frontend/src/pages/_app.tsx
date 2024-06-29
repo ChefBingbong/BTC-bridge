@@ -1,10 +1,12 @@
 import { GeistSans } from "geist/font/sans";
-import type { AppType } from "next/app";
-
+import type { AppProps, AppType } from "next/app";
 import { Providers } from "~/Providers";
 import "~/styles/globals.css";
 
-const MyApp: AppType = ({ Component, pageProps }) => {
+function MyApp(
+  props: AppProps<{ initialReduxState: any; dehydratedState: any }>,
+) {
+  const { pageProps, Component } = props;
   return (
     <main className={GeistSans.className}>
       <Providers>
@@ -12,6 +14,6 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       </Providers>
     </main>
   );
-};
+}
 
 export default MyApp;

@@ -28,14 +28,17 @@ export const TokenAmountWrapper = styled.div<{
   border: 1px solid rgb(184, 152, 233);
   border-radius: 15px;
   margin-top: ${({ marginTop }) => marginTop};
-  padding-left: 15px;
-  padding-right: 20px;
-
   &:hover {
     border: 1px solid rgb(184, 152, 233);
   }
 `;
 
+export const TokenAmountContainer = styled.div<{
+  marginTop: string;
+}>`
+  padding-left: 15px;
+  padding-right: 20px;
+`;
 export const TokenAmount = styled.div`
   font-family: "Open Sans", sans-serif;
   height: 100%;
