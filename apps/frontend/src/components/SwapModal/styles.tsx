@@ -18,13 +18,16 @@ export const GlowSecondary = styled.div`
   width: 70%;
   height: 30%;
 `;
-export const TokenAmountWrapper = styled.div`
+export const TokenAmountWrapper = styled.div<{
+  height: string;
+  marginTop: string;
+}>`
   // width: 100%;
-  height: ${(props: any) => props.height};
+  height: ${({ height }) => height};
   background: rgb(248, 240, 255);
   border: 1px solid rgb(184, 152, 233);
   border-radius: 15px;
-  margin-top: ${(props: any) => props.marginTop};
+  margin-top: ${({ marginTop }) => marginTop};
   padding-left: 15px;
   padding-right: 20px;
 

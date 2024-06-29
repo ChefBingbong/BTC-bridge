@@ -54,7 +54,7 @@ export abstract class SmartWalletRouter {
   public static buildSmartWalletTrade(trade: SmartRouterTrade<TradeType>, options: SmartWalletTradeOptions) {
     SmartWalletRouter.tradeConfig = { ...options, ...trade }
 
-    const planner = new WalletOperationBuilder(options.chainId)
+    const planner = new WalletOperationBuilder()
     const tradeCommand = new ClasicTrade(trade, options)
     tradeCommand.encode(planner)
 
@@ -62,7 +62,7 @@ export abstract class SmartWalletRouter {
   }
 
   public static encodePlan(planner: WalletOperationBuilder, config: SmartWalletTradeOptions) {
-    const { userOps, bridgeOps, externalUserOps } = planner
+    const { userOps, externalUserOps } = planner
     const { address, nonce } = config.smartWalletDetails
 
     const chainId = BigInt(config.chainId)
@@ -71,7 +71,7 @@ export abstract class SmartWalletRouter {
       BigInt(config.allowance.t0nonce),
       BigInt(config.allowance.t1nonce),
     ])
-    const smartWalletTypedData = typedMetaTx(userOps, bridgeOps, permitData, nonce, chainId, chainId, chainId, address)
+    const smartWalletTypedData = typedMetaTx(userOps, permitData, nonce, 1, chainId, address)
     return {
       smartWalletTypedData,
       externalUserOps,
@@ -152,11 +152,11 @@ export abstract class SmartWalletRouter {
     const publicClient = getPublicClient({ chainId: 56 })
     const usdToken = getUsdGasToken(56)
     if (!usdToken) {
-      throw new Error(`No valid usd token found on chain `)
+      throw new Error('No valid usd token found on chain ')
     }
     const nativeWrappedToken = getNativeWrappedToken(56)
     if (!nativeWrappedToken) {
-      throw new Error(`Unsupported chain . Native wrapped token not found.`)
+      throw new Error('Unsupported chain . Native wrapped token not found.')
     }
 
     const priceDataMap = await fetchMultipleTokenUSDPrice(
@@ -292,31 +292,10 @@ export abstract class SmartWalletRouter {
     return { to, amount: 1.5 * 10 ** 9, data: operationCalldata }
   }
 
-  public static async encodeTransferToRelayer(args: [Address, bigint], to: Address, chainId: ChainId) {
-    const { encodedSelector, encodedInput } = encodeOperation(OperationType.TRANSFER, args)
-    const operationCalldata = encodedSelector.concat(encodedInput.substring(2)) as Hex
-    const client = getWalletClient({ chainId })
-    // console.log(client)
-    const account = parseAccount(client?.account as Account)
-    console.log(client, account)
-
-    const txHash = await client.sendTransaction({
-      account,
-      to,
-      amount: 0,
-      data: operationCalldata,
-      chain: CHAINS.find((chain) => chain.id === chainId),
-    })
-    return await getPublicClient({ chainId }).waitForTransactionReceipt({
-      hash: txHash,
-      confirmations: 1,
-    })
-  }
-
   public static async encodeSmartRouterTrade(args: [ECDSAExecType, Hex], to: Address, chainId: ChainId) {
     const provider = getEthersProvider(chainId)
     const smartWalletContract = new ethers.Contract(to, smartWalletAbi, provider)
-    const callData = await smartWalletContract.populateTransaction.exec(args[0], args[1])
+    const callData = await smartWalletContract.exec.populateTransaction(args[0], args[1])
     return { to, amount: 0n, data: callData.data }
   }
 

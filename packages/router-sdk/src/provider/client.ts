@@ -1,7 +1,7 @@
 import { ChainId } from '@pancakeswap/chains'
 import { createPublicClient, fallback, http, type Chain, type PublicClient } from 'viem'
 import { CHAINS, PUBLIC_NODES } from './chains'
-import { JsonRpcProvider } from '@ethersproject/providers'
+import { JsonRpcProvider } from 'ethers'
 
 const createClients = <TClient extends PublicClient>(chains: Chain[]): Record<ChainId, TClient> => {
   return chains.reduce(
@@ -26,7 +26,7 @@ const createClients = <TClient extends PublicClient>(chains: Chain[]): Record<Ch
         },
       }
       const client = createPublicClient(clientConfig)
-      console.log(client, clientConfig)
+
       return {
         // biome-ignore lint/performance/noAccumulatingSpread: <explanation>
         ...prev,

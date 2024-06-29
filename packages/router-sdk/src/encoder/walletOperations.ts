@@ -47,14 +47,10 @@ export const ABI_PARAMETER = {
 
 export class WalletOperationBuilder {
   userOps: UserOp[]
-  bridgeOps: UserOp[]
-  chainId: ChainId
   externalUserOps: any[]
 
-  constructor(chainId: ChainId) {
-    this.chainId = chainId
+  constructor() {
     this.userOps = []
-    this.bridgeOps = []
     this.externalUserOps = []
   }
 
@@ -66,7 +62,7 @@ export class WalletOperationBuilder {
   ): void {
     const { encodedSelector, encodedInput } = encodeOperation(type, parameters)
     const operationCalldata = encodedSelector.concat(encodedInput.substring(2)) as Hex
-    const userOperation = { to: contract, amount: value, chainId: this.chainId, data: operationCalldata }
+    const userOperation = { to: contract, amount: value, data: operationCalldata }
     this.userOps.push(userOperation)
   }
 
@@ -86,21 +82,9 @@ export class WalletOperationBuilder {
     // biome-ignore lint/complexity/noForEach: <explanation>
     calls.forEach((call: SwapCall) => {
       const { address, value, calldata } = call
-      const userOperation = { to: address, amount: BigInt(value), chainId: this.chainId, data: calldata }
+      const userOperation = { to: address, amount: BigInt(value), data: calldata }
       this.userOps.push(userOperation)
     })
-  }
-
-  addBridgeOperation<TOperationType extends OperationUsed>(
-    type: TOperationType,
-    parameters: ABIParametersType<TOperationType>,
-    contract: Address,
-    value = 0n,
-  ): void {
-    const { encodedSelector, encodedInput } = encodeOperation(type, parameters)
-    const operationCalldata = encodedSelector.concat(encodedInput.substring(2)) as Hex
-    const bridgeOperation = { to: contract, amount: value, chainId: this.chainId, data: operationCalldata }
-    this.bridgeOps.push(bridgeOperation)
   }
 }
 

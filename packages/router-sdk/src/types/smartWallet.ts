@@ -33,7 +33,6 @@ export interface SmartWalletTradeOptions extends BaseTradeOptions<PancakeSwapOpt
 export type UserOp = {
   readonly to: Address
   readonly amount: bigint
-  readonly chainId: ChainId | number
   readonly data: Hex
 }
 

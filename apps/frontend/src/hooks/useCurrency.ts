@@ -4,13 +4,10 @@ import { ERC20Token, Currency, NativeCurrency, Native } from "@pancakeswap/sdk";
 
 import type { TokenAddressMap } from "@pancakeswap/token-lists";
 import { useMemo } from "react";
-import {
-  combinedTokenMapFromActiveUrlsAtom,
-  safeGetAddress,
-} from "~/state/lists";
+import { combinedTokenMapFromActiveUrlsAtom } from "~/state/lists";
 import { useChainId, useToken as useToken_ } from "wagmi";
-import { NativeBtc } from "~/state/NativeBtc";
-
+import { NativeBtc } from "~/config/NativeBtc";
+import { safeGetAddress } from "~/utils/misc";
 export default function useNativeCurrency(
   overrideChainId?: ChainId | number,
 ): NativeCurrency {
@@ -53,7 +50,7 @@ const mapWithoutUrls = (
  */
 export function useAllTokens(): { [address: string]: ERC20Token } {
   const tokenMap = combinedTokenMapFromActiveUrlsAtom();
-  console.log(tokenMap);
+
   return useMemo(() => {
     return mapWithoutUrls(tokenMap);
   }, [tokenMap]);
@@ -65,7 +62,6 @@ export function useAllTokens(): { [address: string]: ERC20Token } {
 export function useToken(tokenAddress?: string): ERC20Token | undefined | null {
   const chainId = useChainId();
   const tokens = useAllTokens();
-  console.log(tokens);
   const address = safeGetAddress(tokenAddress);
 
   const token: ERC20Token | undefined = address ? tokens[address] : undefined;

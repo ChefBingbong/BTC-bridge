@@ -57,7 +57,6 @@ export const CurrencySelectPopOver = ({
 
   const handleSearch = useCallback(
     (val: Currency) => {
-      console.log(val.symbol, searchTerm);
       if (!val) return;
       return (
         searchTerm === "" ||
@@ -72,7 +71,7 @@ export const CurrencySelectPopOver = ({
     return [native, ...Object.values(allTokens)]
       .filter((val) =>
         type === "FEE"
-          ? val.symbol === "USDT"
+          ? val.symbol === "USDT" || val.symbol === "CAKE"
           : activeAsset?.symbol !== val.symbol,
       )
       .filter((val) => {
@@ -99,11 +98,6 @@ export const CurrencySelectPopOver = ({
       </div>
       <div className="overflow-y-scroll">
         {filteredtTokens.map((token, index) => {
-          console.log(
-            token.symbol === asset?.symbol,
-            token.symbol,
-            asset?.symbol,
-          );
           const network =
             token.chainId === 0
               ? "Bitcoin Network"

@@ -69,6 +69,6 @@ export function createWagmiConfig() {
     syncConnectedChain: true,
     transports,
     ...CLIENT_CONFIG,
-    connectors: [metaMaskConnector, injectedConnector],
+    connectors: [metaMaskConnector],
   });
 }

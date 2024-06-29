@@ -26,7 +26,7 @@ export const NetworkConnectivityWarning = () => {
 
   useEffect(() => {
     if (!blockNumber) {
-      return;
+      return () => null;
     }
     setIsMounting(true);
     const mountingTimer = setTimeout(() => setIsMounting(false), 1000);
@@ -41,7 +41,7 @@ export const NetworkConnectivityWarning = () => {
     <div className="mx-6 flex items-center justify-center gap-2">
       {account && (
         <div className={"flex h-3 w-3  rounded-full bg-green-500"}>
-          {!isMounting && (
+          {isMounting && (
             <div
               className={`border-primary h-[12px] w-[12px]   animate-spin  items-center justify-center rounded-full border-2 border-b-green-400`}
             />

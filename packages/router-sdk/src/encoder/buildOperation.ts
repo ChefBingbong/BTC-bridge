@@ -4,7 +4,6 @@ export enum RouterTradeType {
   ClassicTrade = 'SmartRouter',
   SmartWalletTrade = 'SmartWalletTrade',
   SmartWalletTradeWithPermit2 = 'SmartWalletTradeWithPermit2',
-  SmartWalletNeonEvmTrade = 'SmartWalletNeonEvmTrade',
 }
 
 export enum Routers {

@@ -27,6 +27,30 @@
                   "decimals": 6,
                   "chainId": 1,
                   "logoURI": "https://tokens.pancakeswap.finance/images/symbol/usdt.png"
+            },
+            {
+                  "name": "PancakeSwap Token",
+                  "address": "0x501B55184813f7a29eb98DECD8EC9B6D07DEB263",
+                  "symbol": "CAKE",
+                  "decimals": 18,
+                  "chainId": 97,
+                  "logoURI": "https://pancakeswap.finance/images/tokens/0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82.png"
+            },
+            {
+                  "name": "Binance USD",
+                  "symbol": "BUSD",
+                  "address": "0x6F451Eb92d7dE92DdF6939d9eFCE6799246B3a4b",
+                  "chainId": 97,
+                  "decimals": 18,
+                  "logoURI": "https://tokens.pancakeswap.finance/images/symbol/busd.png"
+            },
+            {
+                  "name": "Wrapped BNB",
+                  "symbol": "WBNB",
+                  "address": "0xCE79F78537f95a2256e76A3FE4b99D3af148833F",
+                  "chainId": 97,
+                  "decimals": 18,
+                  "logoURI": "https://tokens.pancakeswap.finance/images/symbol/bnb.png"
             }
       ]
 }
