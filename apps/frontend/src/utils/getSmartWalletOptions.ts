@@ -1,5 +1,5 @@
 import type { ChainId } from "@pancakeswap/chains";
-import { Percent } from "@pancakeswap/swap-sdk-core";
+import { Currency, Percent } from "@pancakeswap/swap-sdk-core";
 import {
   type RouterTradeType,
   Routers,
@@ -10,28 +10,21 @@ import type { Address } from "viem";
 
 export const getSmartWalletOptions = (
   address: Address,
-  isUsingPermit2: boolean,
-  allowance: WalletAllownceDetails,
-  smartWalletDetails: never,
+  outAllowance: WalletAllownceDetails,
+  inAllowance: WalletAllownceDetails,
   chainId: ChainId,
-  assets: { inputAsset: Address; feeAsset: Address; outputAsset: Address },
+  feeAsset: Currency,
   type: RouterTradeType,
+  smartWalletDetails: any,
 ): SmartWalletTradeOptions => {
   return {
     account: address,
     chainId,
-    assets,
-    hasApprovedPermit2: allowance.t0Allowance.needsApproval,
-    hasApprovedRelayer: allowance.t0Allowance.needsApproval,
-    smartWalletDetails: smartWalletDetails,
+    feeAsset,
     SmartWalletTradeType: type,
-    router: Routers.SmartOrderRouter,
-    isUsingPermit2: isUsingPermit2,
-    allowance,
-    walletPermitOptions: undefined,
-    underlyingTradeOptions: {
-      recipient: address,
-      slippageTolerance: new Percent(1),
-    },
+    smartWalletDetails: smartWalletDetails,
+    inAllowance,
+    outAllowance,
+    slippageTolerance: new Percent(1),
   };
 };

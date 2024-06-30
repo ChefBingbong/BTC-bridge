@@ -1,0 +1,10 @@
+{
+	"extends": "@btc-swap/tsconfig/react-library",
+	"include": [".", "../../vitest.config.ts", "../test"],
+	"exclude": ["dist", "build", "node_modules"],
+	"compilerOptions": {
+		"outDir": "dist",
+		"resolveJsonModule": true,
+
+	}
+}

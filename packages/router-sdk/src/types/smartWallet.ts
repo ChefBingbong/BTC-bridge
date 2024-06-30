@@ -1,5 +1,5 @@
 import type { ChainId } from '@pancakeswap/chains'
-import type { BigintIsh, Currency } from '@pancakeswap/swap-sdk-core'
+import type { BigintIsh, Currency, Percent } from '@pancakeswap/swap-sdk-core'
 import type { PancakeSwapOptions } from '@pancakeswap/universal-router-sdk'
 import type { MethodParameters } from '@pancakeswap/v3-sdk'
 import type { Address, GetContractReturnType, Hex } from 'viem'
@@ -19,15 +19,15 @@ export interface ClassicTradeOptions<TOps> extends BaseTradeOptions<TOps> {
 }
 
 export interface SmartWalletTradeOptions extends BaseTradeOptions<PancakeSwapOptions> {
-  hasApprovedPermit2: boolean
-  hasApprovedRelayer: boolean
-  assets: { inputAsset: Address; feeAsset: Address; outputAsset: Address }
-  allowance: WalletAllownceDetails
-  isUsingPermit2: boolean
-  walletPermitOptions?: SmartWalletPermitOptions
-  smartWalletDetails: { address: Address; nonce: bigint }
+  address: Address
+  inAllowance: WalletAllownceDetails
+  outAllowance: WalletAllownceDetails
+
+  chainId: ChainId
+  feeAsset: Currency
   SmartWalletTradeType: RouterTradeType
-  router: Routers
+  smartWalletDetails: SmartWalletDetails
+  slippageTolerance: Percent
 }
 
 export type UserOp = {
@@ -67,10 +67,9 @@ export type FeeResponse = {
 export type PackedAllowance = [bigint, Address, number]
 export type TokenAllowance = { allowance: bigint; needsApproval: boolean }
 export type WalletAllownceDetails = {
-  t0Allowance: TokenAllowance
-  t1Allowance: TokenAllowance
-  t0nonce: number
-  t1nonce: number
+  allowance: bigint
+
+  permitNonce: bigint
 }
 export type SmartWalletGasParams = {
   feeAsset: string

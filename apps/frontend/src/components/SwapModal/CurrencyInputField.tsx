@@ -21,11 +21,15 @@ export const CurrencyInputField = ({
   onCurrencySelect,
   onTypeInput,
   inputValue,
+  currencyLoading,
+  disabled = false,
 }: {
   currency: Currency;
   onCurrencySelect: any;
   onTypeInput: any;
   inputValue: string;
+  currencyLoading: boolean;
+  disabled: boolean;
 }) => {
   const [showProivdersPopOver, setShowProvidersPopOver] =
     useState<boolean>(false);
@@ -39,7 +43,7 @@ export const CurrencyInputField = ({
     [onTypeInput],
   );
   return (
-    <TokenAmountWrapper height="100px" marginTop={"12px"}>
+    <TokenAmountWrapper height="100px" marginTop={"5px"}>
       <CurrencySelectPopOver
         setShowProvidersPopOver={setShowProvidersPopOver}
         showProivdersPopOver={showProivdersPopOver}
@@ -50,6 +54,7 @@ export const CurrencyInputField = ({
         <div className="h-full flex-col items-center justify-center gap-4">
           <InfoWrapper>
             <TokenInput
+              disabled={disabled}
               placeholder={"0.0"}
               onChange={(e) => {
                 handleUserInput(e.target.value);
@@ -105,7 +110,20 @@ export const CurrencyInputField = ({
           </InfoWrapper>
 
           <div className="flex w-full justify-between gap-2  text-gray-500">
-            <div className="overflow-ellipsis text-sm">{"You spend"}</div>
+            <div className="flex items-center gap-2">
+              <div className="overflow-ellipsis text-sm">{"You spend"}</div>
+              {currencyLoading && (
+                <div className="flex h-[16px] w-[16px] rounded-full bg-gray-300">
+                  <div
+                    className="animate-spin-slow-fast-slow h-[16px] w-[16px] items-center justify-center rounded-full border-[3px] border-white border-b-[rgb(219,104,147)]"
+                    style={{
+                      boxShadow:
+                        "inset 0 0 5px rgba(109, 72, 195, 0.95), 0 2.5px 3.5px  rgba(119, 82, 205, 0.25)",
+                    }}
+                  />
+                </div>
+              )}
+            </div>
 
             {currency && (
               <div className="overflow-ellipsis text-sm">{`${assetBalance} ${currency?.symbol}`}</div>

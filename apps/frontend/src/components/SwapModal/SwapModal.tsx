@@ -35,6 +35,11 @@ import {
   SmartWalletRouter,
 } from "@btc-swap/router-sdk";
 import {
+  useSmartWalletDetails,
+  useSmartWalletFees,
+  useAllowance,
+} from "@btc-swap/react";
+import {
   TransactionReceipt,
   TransactionRejectedRpcError,
   UserRejectedRequestError,
@@ -44,6 +49,11 @@ import { useSwapState, useSwapctionHandlers } from "~/state/swap/hooks";
 import { Field } from "~/state/swap/actions";
 import { useCurrency, useCurrencyWithId } from "~/hooks/useCurrency";
 import { CurrencyInputField } from "./CurrencyInputField";
+import { useSwapCurrencyAmounts } from "~/hooks/useSwapCurrencyAmounts";
+import { useSwapCurrencyOrder } from "~/hooks/useSwapCurrencies";
+import { TradeDetails } from "./TradeDetails";
+import TransactionFlowModals from "../TxConfirmationModalFlow";
+import { useTransactionFlow } from "~/context/useTransactionFlowState";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -68,32 +78,24 @@ export enum ConfirmModalState {
 
 const SwapModal = () => {
   const { address, connector } = useAccount();
-  const chainId = useChainId();
-  const { signTypedDataAsync } = useSignTypedData();
-
   const {
-    typedValue,
-    independentField,
-    inputCurrencyId,
-    feeCurrencyId,
-    outputCurrencyId,
-  } = useSwapState();
+    toggleConfirmationModal,
+    togglePendingModal,
+    toggleRejectedModal,
+    toggleSubmittedModal,
+    pendingTransaction,
+    setPendingTransaction,
+  } = useTransactionFlow();
+  const chainId = useChainId();
 
-  const inputCurrency = useCurrency(inputCurrencyId);
-  const feeCurrency = useCurrency(feeCurrencyId);
-  const outputCurrency = useCurrency(outputCurrencyId);
+  const { signTypedDataAsync } = useSignTypedData();
+  const { typedValue } = useSwapState();
+
+  const { inputCurrency, outputCurrency, feeCurrency } =
+    useSwapCurrencyOrder().tradeCurrencies;
 
   const { onUserInput, onCurrencySelection, onSwitchTokens } =
     useSwapctionHandlers();
-
-  const handleTypeInput = useCallback(
-    (value: string) => onUserInput(Field.INPUT, value),
-    [onUserInput],
-  );
-  const handleTypeOutput = useCallback(
-    (value: string) => onUserInput(Field.OUTPUT, value),
-    [onUserInput],
-  );
 
   const handleInputSelect = useCallback(
     (newCurrency: Currency) => onCurrencySelection(Field.INPUT, newCurrency),
@@ -108,161 +110,69 @@ const SwapModal = () => {
     [onCurrencySelection],
   );
 
-  const handleToggleSwapState = useCallback(() => {
-    onSwitchTokens();
-  }, [onSwitchTokens]);
+  const { data: inAllowance } = useAllowance(inputCurrency, address);
+  const { data: outAllowance } = useAllowance(feeCurrency, address);
 
-  const amount = useMemo(
-    () =>
-      inputCurrency && typedValue
-        ? CurrencyAmount.fromRawAmount(
-            inputCurrency,
-            Number(typedValue ?? 1) * 10 ** inputCurrency?.decimals ?? 18,
-          )
-        : undefined,
-    [typedValue, inputCurrency],
-  );
-
-  const { data: smartWalletDetails, refetch } = useQuery({
-    queryKey: ["smartWalletDetails", address, inputCurrency?.chainId ?? 0],
-    queryFn: async () => {
-      if (!address || !inputCurrency?.chainId) return;
-      return SmartWalletRouter.getUserSmartWalletDetails(
-        address,
-        inputCurrency.chainId,
-      );
-    },
-    retry: false,
-    refetchOnWindowFocus: false,
-    enabled: Boolean(address && inputCurrency?.chainId),
-  });
-
-  const { data: allowance, refetch: refetchAlloance } = useQuery({
-    queryKey: [
-      "allowance-query",
-      inputCurrency?.symbol,
-      feeCurrency?.symbol,
-      address,
-      inputCurrency?.chainId,
-    ],
-    queryFn: async () => {
-      if (!inputCurrency?.chainId || !address || !amount || !feeCurrency)
-        return undefined;
-
-      return SmartWalletRouter.getContractAllowance(
-        [inputCurrency?.wrapped?.address, feeCurrency?.wrapped?.address],
-        address,
-        inputCurrency.chainId,
-        amount.quotient,
-      );
-    },
-
-    refetchInterval: 20000,
-    retry: false,
-    refetchOnWindowFocus: false,
-    enabled: Boolean(
-      address && inputCurrency?.chainId && amount && feeCurrency?.chainId,
-    ),
-  });
-
-  const { data: trade, isLoading: isFetchingTrade } = useSmartRouterBestTrade({
+  const { data: trade, isLoading: tradeLoading } = useSmartRouterBestTrade({
     toAsset: outputCurrency,
     fromAsset: inputCurrency,
     chainId: inputCurrency?.chainId,
     account: address,
-    amount: amount,
+    amount: typedValue,
   });
 
-  const isTypingInput = independentField === Field.INPUT;
-  const inputValue = useMemo(
-    () =>
-      typedValue &&
-      (isTypingInput ? typedValue : formatAmount(trade?.inputAmount) || ""),
-    [typedValue, isTypingInput, trade],
+  const { data: smartWalletDetails } = useSmartWalletDetails(
+    address!,
+    inputCurrency?.chainId,
   );
-  const outputValue = useMemo(
-    () =>
-      typedValue &&
-      (isTypingInput ? formatAmount(trade?.outputAmount) || "" : typedValue),
-    [typedValue, isTypingInput, trade],
+
+  const handleTypeInput = useCallback(
+    (value: string) => onUserInput(Field.INPUT, value),
+    [onUserInput],
   );
-  const inputLoading = typedValue ? !isTypingInput && isFetchingTrade : false;
-  const outputLoading = typedValue ? isTypingInput && isFetchingTrade : false;
-
-  // console.log(outputValue);
-  const { data: fees, isFetching: isFetchingFees } = useQuery({
-    queryKey: [
-      "fees-query",
-      inputCurrency?.symbol,
-      outputCurrency?.symbol,
-      feeCurrency?.symbol,
-    ],
-    queryFn: async () => {
-      if (!trade || !feeCurrency || !inputCurrency || !outputCurrency)
-        return undefined;
-
-      return SmartWalletRouter.estimateSmartWalletFees({
-        feeCurrency: feeCurrency?.symbol,
-        inputCurrency: inputCurrency,
-        outputCurrency: outputCurrency,
-      });
-    },
-
-    refetchInterval: 10000,
-    retry: false,
-    refetchOnWindowFocus: false,
-    enabled: Boolean(inputCurrency && outputCurrency && feeCurrency && trade),
-  });
-  console.log(fees);
-
-  const swapCallParams = useMemo(() => {
-    if (
-      !trade ||
-      !inputCurrency ||
-      !feeCurrency ||
-      !outputCurrency ||
-      !allowance ||
-      !smartWalletDetails ||
-      !address
-    )
-      return undefined;
-
-    const options = getSmartWalletOptions(
-      address,
-      true,
-      allowance,
-      smartWalletDetails as never,
-      inputCurrency.chainId,
-      {
-        inputAsset: inputCurrency.wrapped?.address,
-        feeAsset: feeCurrency.wrapped?.address,
-        outputAsset: outputCurrency.wrapped?.address,
-      },
-      RouterTradeType.SmartWalletTradeWithPermit2,
-    );
-    return SmartWalletRouter.buildSmartWalletTrade(trade, options);
-  }, [
-    trade,
-    address,
-    allowance,
-    smartWalletDetails,
-    inputCurrency,
-    feeCurrency,
-    outputCurrency,
-  ]);
+  const handleTypeOutput = useCallback(
+    (value: string) => onUserInput(Field.OUTPUT, value),
+    [onUserInput],
+  );
+  const { input, output, fees } = useSwapCurrencyAmounts(trade, tradeLoading);
 
   const swap = useCallback(async () => {
-    if (!swapCallParams || !address || !allowance || !inputCurrency) return;
+    if (
+      !trade ||
+      !address ||
+      !inAllowance ||
+      !outAllowance ||
+      !feeCurrency ||
+      !smartWalletDetails
+    )
+      return;
+    togglePendingModal();
+    const inputAsset = trade.inputAmount.currency.wrapped;
+    const options = getSmartWalletOptions(
+      address,
+      outAllowance,
+      inAllowance,
+      chainId,
+      feeCurrency,
+      RouterTradeType.SmartWalletTradeWithPermit2,
+      smartWalletDetails as never,
+    );
+    const swapCallParams = SmartWalletRouter.buildSmartWalletTrade(
+      trade,
+      options,
+    );
+
+    const externalOps = swapCallParams.externalUserOps;
+    const { domain, types, values } = swapCallParams.smartWalletTypedData;
 
     const windowClient = await connector?.getClient?.({
-      chainId: inputCurrency.chainId,
+      chainId: inputAsset.chainId,
     });
-    const externalOps = swapCallParams.externalUserOps;
 
     if (externalOps.length > 0) {
       for (const externalOp of externalOps) {
         await SmartWalletRouter.sendTransactionFromRelayer(
-          inputCurrency.chainId,
+          inputAsset.chainId,
           externalOp as never,
           {
             externalClient: windowClient as any,
@@ -270,8 +180,6 @@ const SwapModal = () => {
         );
       }
     }
-    const { domain, types, values } = swapCallParams.smartWalletTypedData;
-    console.log(values, swapCallParams.smartWalletTypedData);
     await signTypedDataAsync({
       account: address,
       domain,
@@ -280,6 +188,12 @@ const SwapModal = () => {
       primaryType: "ECDSAExec",
     })
       .then(async (signature) => {
+        toggleSubmittedModal();
+        setPendingTransaction(true);
+
+        handleTypeInput("");
+        handleTypeOutput("");
+
         const signatureEncoded = defaultAbiCoder.encode(
           ["uint256", "bytes"],
           [chainId, signature],
@@ -289,115 +203,118 @@ const SwapModal = () => {
           const walletDeploymentOp =
             await SmartWalletRouter.encodeWalletCreationOp(
               [address],
-              Deployments[inputCurrency.chainId].ECDSAWalletFactory as any,
+              Deployments[inputAsset.chainId].ECDSAWalletFactory as any,
             );
 
-          const response = await SmartWalletRouter.sendTransactionFromRelayer(
-            inputCurrency.chainId,
+          await SmartWalletRouter.sendTransactionFromRelayer(
+            inputAsset.chainId,
             walletDeploymentOp as any,
           );
-          console.log(response);
         }
         const tradeEncoded = await SmartWalletRouter.encodeSmartRouterTrade(
           [values.userOps, values.allowanceOp, signatureEncoded as any],
           smartWalletDetails?.address,
-          inputCurrency.chainId,
+          inputAsset.chainId,
         );
-        console.log(tradeEncoded, values);
 
-        let response = null;
         if (
           swapCallParams.config.SmartWalletTradeType ===
           RouterTradeType.SmartWalletTradeWithPermit2
         ) {
-          response = await SmartWalletRouter.sendTransactionFromRelayer(
-            inputCurrency.chainId,
+          return await SmartWalletRouter.sendTransactionFromRelayer(
+            inputAsset.chainId,
             tradeEncoded as any,
-          );
-        } else {
-          response = await SmartWalletRouter.sendTransactionFromRelayer(
-            inputCurrency.chainId,
-            tradeEncoded as any,
-            {
-              externalClient: windowClient as any,
-            },
           );
         }
-        console.log(response);
-        onUserInput(Field.INPUT, "");
-        refetch();
-
-        return response as TransactionReceipt;
+        return await SmartWalletRouter.sendTransactionFromRelayer(
+          inputAsset.chainId,
+          tradeEncoded as any,
+          {
+            externalClient: windowClient as any,
+          },
+        );
       })
       .catch((err: unknown) => {
-        console.log(err);
+        setPendingTransaction(false);
+        toggleRejectedModal();
         if (err instanceof UserRejectedRequestError) {
           throw new TransactionRejectedRpcError(Error("Transaction rejected"));
         }
         throw new Error(`Swap Failed ${err as string}`);
       });
   }, [
-    swapCallParams,
     address,
     signTypedDataAsync,
-    inputCurrency?.chainId,
-    allowance,
+    connector,
+    inAllowance,
+    outAllowance,
     smartWalletDetails,
+    chainId,
+    feeCurrency,
+    onUserInput,
+    trade,
   ]);
+
   return (
     <>
+      <TransactionFlowModals
+        asset={inputCurrency}
+        buttonState={"Transaction"}
+        text={"Swap"}
+        executeTx={swap}
+      />
       <div className="   mt-[85px] flex  items-center justify-center">
         <div className="z-10 flex w-[70%] items-center justify-center gap-8">
           <BridgeModalContainer>
-            {/* <CurrencySelectPopOver
-            setShowProvidersPopOver={setShowProvidersPopOver}
-            showProivdersPopOver={showProivdersPopOver}
-          /> */}
-
-            {/* <CurrencySelectPopOver
-              setShowProvidersPopOver={setShowProvidersPopOver}
-              showProivdersPopOver={showProivdersPopOver}
-              asset={outputCurrency}
-              onCurrencySelect={handleOutputSelect}
-            /> */}
-
             <div className="flex justify-between px-2">
-              <div>Swap</div>
-              <CloseIcon />
-              <ArrowDownContainer onClick={handleToggleSwapState}>
-                <UilAngleDown className={"h-6 w-6"} />
+              <div className="text-[rgb(220,248,253)]">Swap</div>
+              <CloseIcon color="rgb(240, 240, 240)" />
+              <ArrowDownContainer onClick={onSwitchTokens}>
+                <UilAngleDown className={"h-6 w-6 "} />
               </ArrowDownContainer>
             </div>
             <CurrencyInputField
               currency={inputCurrency}
               onCurrencySelect={handleInputSelect}
               onTypeInput={handleTypeInput}
-              inputValue={isTypingInput ? typedValue : inputValue}
+              inputValue={input.inputValue}
+              currencyLoading={input.inputLoading}
             />
             <CurrencyInputField
               currency={feeCurrency}
               onCurrencySelect={handleFeeSelect}
               onTypeInput={() => null}
-              inputValue={formatAmount(fees?.gasCostInBaseToken) ?? ""}
+              inputValue={formatAmount(fees?.fees?.gasCostInBaseToken) ?? ""}
+              disabled
+              currencyLoading={fees.feesLoading}
             />
             <CurrencyInputField
               currency={outputCurrency}
               onCurrencySelect={handleOutputSelect}
               onTypeInput={handleTypeOutput}
-              inputValue={isTypingInput ? outputValue : typedValue}
+              inputValue={fees.outputValueMinusFees}
+              currencyLoading={output.outputLoading}
             />
-
+            <TradeDetails
+              trade={trade}
+              inputAmounts={input}
+              outputAmounts={output}
+              feeAmounts={fees}
+            />
             <ButtonWrapper>
               <PrimaryButton
-                className="w-full items-center justify-center rounded-[15px] py-4 font-semibold hover:bg-[rgb(229,115,157)]"
+                className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[15px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
                 disabled={!address}
-                onClick={swap}
+                onClick={toggleConfirmationModal}
+                variant="secondary"
               >
-                {!address
-                  ? "Connect Wallet"
-                  : typedValue !== ""
-                    ? `Swap ${typedValue} ${inputCurrency?.symbol}`
-                    : "Enter An Amount"}
+                {pendingTransaction
+                  ? "Swap Processing"
+                  : !address
+                    ? "Connect Wallet"
+                    : typedValue !== ""
+                      ? `Swap ${typedValue} ${inputCurrency?.symbol}`
+                      : "Enter An Amount"}
               </PrimaryButton>
             </ButtonWrapper>
           </BridgeModalContainer>

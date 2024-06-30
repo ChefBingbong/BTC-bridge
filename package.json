@@ -10,7 +10,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "preinstall": "npx only-allow pnpm",
-    "dev": "turbo run dev --filter=frontend... --concurrency=4",
+    "dev": "turbo run dev --filter=frontend... --concurrency=5",
     "build": "turbo run build --filter=frontend...",
     "build:packages": "turbo run build --filter=./packages/*",
     "start": "turbo run start --filter=frontend",

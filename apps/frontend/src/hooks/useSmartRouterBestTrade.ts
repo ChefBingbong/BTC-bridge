@@ -6,15 +6,11 @@ import {
   type Currency,
 } from "@pancakeswap/swap-sdk-core";
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import BigNumber from "bignumber.js";
 import { useDeferredValue } from "react";
 import type { Address } from "viem";
-import {
-  v2Clients,
-  v2SubgraphClient,
-  v3Clients,
-  v3SubgraphClient,
-} from "../config/graphClient";
 import { publicClient } from "~/config/viem";
+import { v2SubgraphClient, v3SubgraphClient } from "../config/graphClient";
 import {
   createQueryKey,
   type Evaluate,
@@ -40,7 +36,7 @@ type TradeQuotePayloadParsed = {
   toAsset: Currency | undefined;
   fromAsset: Currency | undefined;
   chainId: ChainId | undefined;
-  amount: CurrencyAmount<Currency> | undefined;
+  amount: string | undefined;
   account: Address | undefined;
 };
 
@@ -60,9 +56,10 @@ export const useSmartRouterBestTrade = <selectData = GetTradeQuoteReturnType>(
 ) => {
   const { chainId, fromAsset, toAsset, amount, account } = parameters;
 
-  const deferQuotientRaw = useDeferredValue(amount?.quotient.toString());
+  const amountInBE = BigNumber(amount).shiftedBy(fromAsset?.decimals ?? 18);
+  const deferQuotientRaw = useDeferredValue(amountInBE.toString());
   const deferQuotient = useDebounce(deferQuotientRaw, 500);
-  // console.log(publicClient({ chainId }));
+
   return useQuery({
     queryKey: getTradeQuoteQueryKey([
       {
@@ -105,8 +102,8 @@ export const useSmartRouterBestTrade = <selectData = GetTradeQuoteReturnType>(
       const pools = [...v2Pools, ...v3Pools];
 
       const deferAmount = CurrencyAmount.fromRawAmount(
-        amount?.currency,
-        deferQuotient!,
+        fromAsset,
+        deferQuotient,
       );
       const res = await SmartRouter.getBestTrade(
         deferAmount,
@@ -124,8 +121,6 @@ export const useSmartRouterBestTrade = <selectData = GetTradeQuoteReturnType>(
 
       return res;
     },
-    //     enabled: !!(fromAsset && amount && toAsset && account && chainId),
-
     refetchOnWindowFocus: false,
     retry: false,
     staleTime: 15000,

@@ -25,18 +25,26 @@ export class ClasicTrade implements Command {
 
   encode(planner: WalletOperationBuilder): void {
     const { trade, options } = this
-    const { chainId, smartWalletDetails, account } = options
+    const { smartWalletDetails, account, inAllowance, outAllowance, feeAsset } = options
 
-    const tradeOptions = options.underlyingTradeOptions
+    const slippageTolerance = options.slippageTolerance
+    const chainId = trade.inputAmount.currency.chainId
     const inputToken = trade.inputAmount.currency.wrapped.address
-    const routerRecipient = RouterRecipientByTrade[this.options.router](chainId)
+    const routerRecipient = RouterRecipientByTrade[Routers.SmartOrderRouter](chainId)
 
-    const amountIn = SmartRouter.maximumAmountIn(trade, tradeOptions.slippageTolerance, trade.inputAmount).quotient
+    const amountIn = SmartRouter.maximumAmountIn(trade, slippageTolerance, trade.inputAmount).quotient
     const smartRouterAddress = getSwapRouterAddress(chainId)
     const permit2Address = smartWalletDetails.address
 
-    if (!options.hasApprovedPermit2) {
+    const isSameFeeAsset = feeAsset.wrapped.address === inputToken
+    const hasApprovedPermit2ForBase = Boolean(inAllowance.allowance >= amountIn)
+    const hasApprovedPermit2ForFee = Boolean(outAllowance.allowance >= amountIn)
+
+    if (!hasApprovedPermit2ForBase) {
       planner.addExternalUserOperation(OperationType.APPROVE, [permit2Address, maxUint256], inputToken)
+    }
+    if (!hasApprovedPermit2ForFee && !isSameFeeAsset) {
+      planner.addExternalUserOperation(OperationType.APPROVE, [permit2Address, maxUint256], feeAsset.wrapped.address)
     }
     if (this.tradeType === RouterTradeType.SmartWalletTradeWithPermit2) {
       planner.addUserOperation(
@@ -45,7 +53,7 @@ export class ClasicTrade implements Command {
         smartWalletDetails.address,
       )
       if (routerRecipient === smartRouterAddress) {
-        const { calldata, value } = SwapRouter.swapCallParameters(trade, tradeOptions as never)
+        const { calldata, value } = SwapRouter.swapCallParameters(trade, { slippageTolerance })
         planner.addUserOperation(OperationType.APPROVE, [routerRecipient, BigInt(amountIn)], inputToken)
         planner.addUserOperationFromCall([{ address: routerRecipient, calldata, value }])
       }

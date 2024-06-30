@@ -81,8 +81,8 @@ const reducer = createReducer<SwapState>(initialState, (builder) =>
       return {
         ...state,
         inverted: !!state.inverted,
-        // independentField:
-        //   state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
+        independentField:
+          state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
         inputCurrencyId: state.outputCurrencyId,
         outputCurrencyId: state.inputCurrencyId,
       };

@@ -26,7 +26,7 @@ import type {
   UserOp,
   WalletAllownceDetails,
 } from './types/smartWallet'
-import { getSmartWallet, getSmartWalletFactory } from './utils/contracts'
+import { getErc20Contract, getSmartWallet, getSmartWalletFactory } from './utils/contracts'
 import { AccountNotFoundError } from './utils/error'
 import { typedMetaTx } from './utils/typedMetaTx'
 import { getNativeWrappedToken, getTokenPriceByNumber, getUsdGasToken } from './utils/estimateGas'
@@ -43,36 +43,33 @@ export abstract class SmartWalletRouter {
   public static chainId: ChainId
   public static isInitialized = false
 
-  public static tradeConfig: Partial<ClassicTradeOptions<PancakeSwapOptions>> & SmartRouterTrade<TradeType> =
-    {} as Partial<ClassicTradeOptions<PancakeSwapOptions>> & SmartRouterTrade<TradeType>
-
-  public static updateConfig(config: SmartWalletTradeOptions) {
-    SmartWalletRouter.account = config.account
-    SmartWalletRouter.smartWallet = config.smartWalletDetails.address
-    SmartWalletRouter.chainId = config.chainId
-  }
-
   public static buildSmartWalletTrade(trade: SmartRouterTrade<TradeType>, options: SmartWalletTradeOptions) {
-    SmartWalletRouter.tradeConfig = { ...options, ...trade }
-
     const planner = new WalletOperationBuilder()
     const tradeCommand = new ClasicTrade(trade, options)
     tradeCommand.encode(planner)
 
-    return SmartWalletRouter.encodePlan(planner, options)
+    return SmartWalletRouter.encodePlan(planner, options, trade)
   }
 
-  public static encodePlan(planner: WalletOperationBuilder, config: SmartWalletTradeOptions) {
+  public static encodePlan(
+    planner: WalletOperationBuilder,
+    config: SmartWalletTradeOptions,
+    trade: SmartRouterTrade<TradeType>,
+  ) {
     const { userOps, externalUserOps } = planner
     const { address, nonce } = config.smartWalletDetails
 
     const chainId = BigInt(config.chainId)
-    const { inputAsset, feeAsset } = config.assets
+    const execChainId = BigInt(trade.inputAmount.currency.chainId)
+
+    const inputAsset = trade.inputAmount.currency.wrapped.address
+    const feeAsset = config.feeAsset.wrapped.address
+
     const { permitData } = permit2TpedData([inputAsset, feeAsset], address, [
-      BigInt(config.allowance.t0nonce),
-      BigInt(config.allowance.t1nonce),
+      BigInt(config.inAllowance.permitNonce),
+      BigInt(config.outAllowance.permitNonce),
     ])
-    const smartWalletTypedData = typedMetaTx(userOps, permitData, nonce, 1n, chainId, address)
+    const smartWalletTypedData = typedMetaTx(userOps, permitData, nonce, chainId, execChainId, address)
     return {
       smartWalletTypedData,
       externalUserOps,
@@ -225,65 +222,30 @@ export abstract class SmartWalletRouter {
     }
   }
 
-  public static async getContractAllowance(
-    tokens: Address[],
-    owner: Address,
-    chainId: ChainId,
-    amount: bigint,
-  ): Promise<WalletAllownceDetails> {
+  public static async getContractAllowance(currency: Currency, owner: Address): Promise<WalletAllownceDetails> {
     try {
-      const client = getViemClient({ chainId })
+      const chainId = currency.chainId
+      const token = currency.wrapped.address
 
-      const { address: spender } = await SmartWalletRouter.getUserSmartWalletDetails(owner, chainId)
-      const [[, , t0nonce], [, , t1nonce]] = (await client.multicall({
-        contracts: [
-          ...tokens.map((token) => ({
-            functionName: 'allowance',
-            args: [owner, token, spender],
-            address: spender,
-            abi: smartWalletAbi,
-          })),
-        ],
-        allowFailure: false,
-      })) as unknown as [PackedAllowance, PackedAllowance]
+      const client = getViemClient({ chainId: currency.chainId })
+      const factory = getSmartWalletFactory(chainId)
+      const tokenContract = getErc20Contract(chainId, token)
 
-      const allowances = (await client.multicall({
-        contracts: [
-          ...tokens.map((token) => ({
-            functionName: 'allowance',
-            args: [owner, spender],
-            address: token,
-            abi: ERC20ABI,
-          })),
-        ],
-        allowFailure: false,
-      })) as [bigint, bigint]
+      const spender = await factory.read.walletAddress([owner, BigInt(0)])
+      const allowance = await tokenContract.read.allowance([owner, spender])
 
-      const [t0Allowance, t1Allowance] = allowances.map((all) => {
-        if (all < amount) return { allowance: all, needsApproval: false }
-        return { allowance: all, needsApproval: true }
-      })
+      const smartWalletByteCode = await client.getBytecode({ address: spender })
+      const smartWallet = getSmartWallet(chainId, spender)
 
-      return { t0Allowance, t1Allowance, t0nonce, t1nonce }
-    } catch (error) {
-      console.log(
-        getContractError(error as BaseError, {
-          abi: ERC20ABI,
-          address: tokens[0],
-          args: [owner, owner],
-          functionName: 'allowance',
-        }),
-      )
-
-      return {
-        t0Allowance: { allowance: 0n, needsApproval: false },
-        t1Allowance: {
-          allowance: 0n,
-          needsApproval: false,
-        },
-        t0nonce: 0,
-        t1nonce: 0,
+      if (smartWalletByteCode !== '0x') {
+        const [, , permitNonce] = await smartWallet.read.allowance([owner, token, spender])
+        return { allowance, permitNonce: BigInt(permitNonce) }
       }
+
+      return { allowance, permitNonce: 0n }
+    } catch (error) {
+      console.error(error)
+      return { allowance: 0n, permitNonce: 0n }
     }
   }
 

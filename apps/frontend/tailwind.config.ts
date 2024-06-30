@@ -12,6 +12,7 @@ export default {
         blink: "pusle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         widthi: "widthin 1s forwards",
         widtho: "widthout 1s backwards",
+        "spin-slow-fast-slow": "spinSlowFastSlow 1.0s infinite",
       },
       keyframes: {
         pusle: {
@@ -25,6 +26,20 @@ export default {
         widthout: {
           "0%": { left: "0%" },
           "100%": { left: "150%" },
+        },
+        spinSlowFastSlow: {
+          "0%": {
+            transform: "rotate(0deg)",
+            "animation-timing-function": "cubic-bezier(0.72, 0, 1.0, 1.0)",
+          },
+          "50%": {
+            transform: "rotate(180deg)",
+            "animation-timing-function": "cubic-bezier(0.1, 0.15, 0.2, 1.0)",
+          },
+          "100%": {
+            transform: "rotate(360deg)",
+            "animation-timing-function": "cubic-bezier(0.72, 0, 1.0, 1.0)",
+          },
         },
       },
       transitionProperty: {

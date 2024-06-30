@@ -25,12 +25,14 @@ export const TokenAmountWrapper = styled.div<{
   // width: 100%;
   height: ${({ height }) => height};
   background: rgb(248, 240, 255);
-  border: 1px solid rgb(184, 152, 233);
+  border: 1.2px solid transparent;
+  // box-shadow: inset 0 1px 2px rgba(175, 151, 196, 0.3);
   border-radius: 15px;
   margin-top: ${({ marginTop }) => marginTop};
   &:hover {
-    border: 1px solid rgb(184, 152, 233);
-  }
+    border: 1.2px solid rgb(244, 242, 243);
+    box-shadow: inset 1px 1px 5px 1px rgba(175, 151, 196, 0.35);
+  } //184, 152, 233
 `;
 
 export const TokenAmountContainer = styled.div<{
@@ -72,11 +74,11 @@ export const ErrorText = styled.div`
 
 export const CloseIcon = styled(Settings)`
   position: absolute;
-  left: 91%;
-  top: 3%;
+  left: 92%;
+  top: 1.45%;
   cursor: pointer;
   color: White;
-  width: 20px;
+  width: 18px;
   color: white;
 `;
 
@@ -91,9 +93,9 @@ export const UniswapIcon = styled.img`
 `;
 
 export const ArrowDownContainer = styled.div`
-  position: absolute;
-  top: 30%;
-  left: 45%;
+  position: fixed;
+  top: 285px;
+  left: 28.5%;
   background-color: rgb(214, 182, 263);
   border: 5px solid rgb(184, 152, 233);
   border-radius: 10px;
@@ -141,7 +143,7 @@ export const Button = styled.div`
 
 export const ButtonWrapper = styled.div`
   font-family: "Open Sans", sans-serif;
-  margin-top: 14px;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -256,17 +258,20 @@ export const ButtonContents = styled.span`
 export const BridgeModalContainer = styled.div`
   // min-width: 480px;
   width: 460px;
-
-  color: White;
-  background-color: rgb(184, 152, 233);
+  // color: White;
+  background-color: rgba(184, 152, 233, 0.95);
   text-align: right;
-  padding: 12px 12px;
-  //   border: 1px solid rgb(204, 182, 253);
+  // box-shadow: inset 0 3px 4px rgba(175, 151, 196, 0.4);
+
+  padding: 6px 7px;
+  border-top: 1px solid rgb(214, 212, 245);
   border-radius: 20px;
   box-shadow:
-    10px 10px 20px rgba(169, 134, 206, 0.1),
-    10px 10px 20px rgba(169, 134, 206, 0.1),
-    -20px 10px 30px rgba(169, 134, 206, 0.4);
+    inset 0 -5px 10px -5px rgba(29, 64, 76, 0.4),
+    -15px 15px 2px rgba(169, 134, 206, 0.1),
+    -10px 10px 2px rgba(169, 134, 206, 0.1),
+    -5px 5px 5px rgba(169, 134, 206, 0.1);
+
   //   margin: 30px auto 0;
   transition: height 3s ease-out;
   position: relative;

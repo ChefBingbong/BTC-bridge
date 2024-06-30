@@ -1,4 +1,6 @@
 import type { ChainId } from "@pancakeswap/chains";
+import { ERC20Token } from "@pancakeswap/sdk";
+import { Currency } from "@pancakeswap/swap-sdk-core";
 import type {
   DefaultError,
   QueryKey,
@@ -52,5 +54,10 @@ export type TradeQuotePayload = {
   chainId: ChainId;
   amount: string;
   account: Address;
+};
 
+export type TradeCurrencies = {
+  inputCurrency: Currency | null | undefined;
+  outputCurrency: Currency | null | undefined;
+  feeCurrency: Currency | ERC20Token | null | undefined;
 };
