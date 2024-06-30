@@ -7,7 +7,9 @@ export const Nav = styled.nav`
   z-index: 12;
   box-sizing: border-box;
   display: block;
-  background-color: #ffffff20;
+  // background-color: rgba(0, 0, 0, 0.03);
+  box-shadow: 0px -1px 4px 0px rgba(184, 152, 233, 0.75);
+
   position: absolute;
 `;
 

@@ -6,7 +6,14 @@ import {
 } from "@iconscout/react-unicons";
 import { CurrencyAmount, type Currency } from "@pancakeswap/sdk";
 import type React from "react";
-import { useCallback, useDeferredValue, useMemo, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ChevronDown } from "react-feather";
 import { useAccount, useChainId, useSignTypedData } from "wagmi";
 import { useTokenBalance } from "~/hooks/useBalance";
@@ -22,7 +29,9 @@ import {
   ButtonContents,
   ButtonWrapper,
   CloseIcon,
+  GlowFourth,
   GlowSecondary,
+  GlowThird,
   InfoWrapper,
   SelectedToken,
   TokenAmountContainer,
@@ -67,11 +76,23 @@ import { Box, Flex, Text } from "@pancakeswap/uikit";
 import Toggle from "../Toggle/Toggle";
 import { BoxItemContainer } from "../Navbar/styles";
 import { BASES_TO_CHECK_TRADES_AGAINST } from "@pancakeswap/smart-router";
+import styled from "styled-components";
+
+export const SummaryBar = styled(Flex)<{ hide: boolean; elHeight: number }>`
+  overflow-y: hidden;
+  transition: height 0.2s ease-in-out;
+  height: ${({ hide, elHeight }) => (hide ? "0px" : `${elHeight}px`)};
+`;
 
 const SwapModal = () => {
   const { address } = useAccount();
   const { typedValue } = useSwapState();
   const [isActive, setActive] = useState(false);
+  const [elementHeight, setElementHeight] = useState<number>(20);
+  const [show, setShow] = useState<boolean>(false);
+
+  const containerRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const { inputCurrency, outputCurrency, feeCurrency } =
     useSwapCurrencyOrder().tradeCurrencies;
@@ -127,11 +148,19 @@ const SwapModal = () => {
   );
   const { input, output, fees } = useSwapCurrencyAmounts(trade, tradeLoading);
 
+  const handleExpandClick = useCallback(() => setShow(!show), [show]);
+
   const handleOnBlur = useCallback(() => {
     setTimeout(() => {
       setActive(false);
     }, 100);
   }, []);
+
+  useEffect(() => {
+    const elRef = contentRef.current;
+    if (elRef) setElementHeight(elRef.scrollHeight);
+  }, []);
+
   return (
     <>
       <div className="grid h-screen w-full grid-rows-6">
@@ -141,10 +170,13 @@ const SwapModal = () => {
           <div className="  h-full ">
             <div className=" grid-cols  grid">
               <div className="col-span-3 ">
-                <BridgeModalContainer>
+                <BridgeModalContainer ref={containerRef}>
                   <div className="flex justify-between px-2">
                     <div className="text-[rgb(220,248,253)]">Swap</div>
-                    <CloseIcon color="rgb(172, 201, 242)" />
+                    <CloseIcon
+                      color="rgb(172, 201, 242)"
+                      onClick={handleExpandClick}
+                    />
                     <ArrowDownContainer onClick={onSwitchTokens}>
                       <UilAngleDown className={"h-6 w-6 "} />
                     </ArrowDownContainer>
@@ -156,16 +188,23 @@ const SwapModal = () => {
                     inputValue={input.inputValue}
                     currencyLoading={input.inputLoading}
                   />
-                  <CurrencyInputField
-                    currency={feeCurrency}
-                    onCurrencySelect={handleFeeSelect}
-                    onTypeInput={() => null}
-                    inputValue={
-                      formatAmount(fees?.fees?.gasCostInBaseToken) ?? ""
-                    }
-                    disabled
-                    currencyLoading={fees.feesLoading}
-                  />
+                  <SummaryBar
+                    ref={contentRef}
+                    hide={show}
+                    elHeight={elementHeight}
+                    // alignItems="center"
+                  >
+                    <CurrencyInputField
+                      currency={feeCurrency}
+                      onCurrencySelect={handleFeeSelect}
+                      onTypeInput={() => null}
+                      inputValue={
+                        formatAmount(fees?.fees?.gasCostInBaseToken) ?? ""
+                      }
+                      disabled
+                      currencyLoading={fees.feesLoading}
+                    />
+                  </SummaryBar>
                   <CurrencyInputField
                     currency={outputCurrency}
                     onCurrencySelect={handleOutputSelect}
@@ -173,17 +212,18 @@ const SwapModal = () => {
                     inputValue={fees.outputValueMinusFees}
                     currencyLoading={output.outputLoading}
                   />
-                  <Flex width="100%" mt="6px">
+                  {/* <Flex width="100%" mt="6px">
                     <BoxItemContainer allignment="center">
                       <div
                         className={
-                          "relative flex  h-[50px] w-full items-center justify-center rounded-xl border border-[rgb(214,182,263)] bg-[rgb(244,240,255)] px-4  "
+                          "relative flex  h-[55px] w-full items-center justify-center rounded-xl border bg-[rgb(255,255,255,0.9)] px-4 hover:bg-[rgb(255,255,255)]  "
                         }
-                        style={
-                          {
-                            // background: isActive ? "rgb(240,227,254)" : undefined,
-                          }
-                        }
+                        style={{
+                          // background: isActive ? "rgb(240,227,254)" : undefined,
+                          border: "border: 1.2px solid rgb(244, 242, 243)",
+                          boxShadow:
+                            "inset 1px 0px 1px 1px rgba(175, 151, 196, 0.35)",
+                        }}
                       >
                         <input
                           value={""}
@@ -195,14 +235,42 @@ const SwapModal = () => {
                         />
                       </div>
                     </BoxItemContainer>
-                  </Flex>
+                  </Flex> */}
+                  <Flex
+                    width="100%"
+                    justifyContent="space-between"
+                    py="8px"
+                    px="10px"
+                  >
+                    <Flex justifyContent="space-between" width="100%">
+                      <Box width="max-content">
+                        <Text
+                          width="max-content"
+                          fontSize="13px"
+                          color="#7A6EAA"
+                          fontWeight="600"
+                        >
+                          {"Custome Fees"}
+                        </Text>
+                      </Box>
 
-                  <TradeDetails
-                    trade={trade}
-                    inputAmounts={input}
-                    outputAmounts={output}
-                    feeAmounts={fees}
-                  />
+                      <Flex
+                        width="max-content"
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        <Toggle checked={false} onChange={handleOnBlur} />
+                        {/* <Text
+                  pl="2px"
+                  fontSize="13px"
+                  fontWeight="500"
+                  color="rgb(325, 235, 235)"
+                >
+                  {`${data}`}
+                </Text> */}
+                      </Flex>
+                    </Flex>
+                  </Flex>
 
                   <SwapButton
                     trade={trade}
@@ -214,6 +282,14 @@ const SwapModal = () => {
                     fees={fees}
                   />
                 </BridgeModalContainer>
+                <div className="my-1 px-[6px]">
+                  <TradeDetails
+                    trade={trade}
+                    inputAmounts={input}
+                    outputAmounts={output}
+                    feeAmounts={fees}
+                  />
+                </div>
               </div>
               {/* <div className="col-span-5 flex  w-full justify-end">
                 <TransactionsContainer>
@@ -230,9 +306,11 @@ const SwapModal = () => {
             </div>
           </div>
         </div>
-
-        {/* <GlowSecondary /> */}
       </div>
+
+      <GlowSecondary />
+      <GlowThird />
+      <GlowFourth />
     </>
   );
 };

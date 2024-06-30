@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { WagmiProvider } from "wagmi";
 import { createWagmiConfig } from "~/config/wagmiConfig";
 import { TransactionFlowStateProvider } from "./context/useTransactionFlowState";
+import NotificationProvider from "./context/useNotificationState";
 
 const queryClient = new QueryClient();
 
@@ -14,9 +15,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <TransactionFlowStateProvider>
-          <NextThemeProvider>
-            <SaasProvider>{children}</SaasProvider>
-          </NextThemeProvider>
+          <NotificationProvider>
+            <NextThemeProvider>
+              <SaasProvider>{children}</SaasProvider>
+            </NextThemeProvider>
+          </NotificationProvider>
         </TransactionFlowStateProvider>
       </QueryClientProvider>
     </WagmiProvider>

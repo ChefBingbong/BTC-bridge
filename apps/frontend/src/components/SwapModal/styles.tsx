@@ -1,13 +1,48 @@
 import styled, { css, keyframes } from "styled-components";
 import { Settings } from "react-feather";
 import { Flex } from "@pancakeswap/uikit";
-
-export const GlowSecondary = styled.div`
+export const GlowFourth = styled.div`
+  position: absolute;
+  top: 0%;
+  left: 25%;
+  //   bottom: 0;
+  background: rgb(77, 208, 134);
+  background: radial-gradient(
+    circle,
+    rgba(77, 208, 134, 1) 32%,
+    rgba(49, 231, 104, 0.7735688025210083) 79%
+  );
+  filter: blur(155px);
+  z-index: 1;
+  max-width: 350px;
+  width: 100%;
+  height: 80%;
+  opacity: 0.6;
+`;
+export const GlowThird = styled.div`
   position: absolute;
   top: 23%;
   left: 40%;
   //   bottom: 0;
-  background: rgb(42, 205, 187, 0.8);
+  background: rgb(173, 67, 196);
+  background: radial-gradient(
+    circle,
+    rgba(173, 67, 196, 1) 22%,
+    rgba(230, 144, 231, 0.7735688025210083) 79%
+  );
+  filter: blur(155px);
+  z-index: 1;
+  max-width: 350px;
+  width: 100%;
+  height: 80%;
+  opacity: 0.4;
+`;
+export const GlowSecondary = styled.div`
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  //   bottom: 0;
+
   background: radial-gradient(
     circle,
     rgba(42, 205, 220, 1) 6%,
@@ -16,18 +51,18 @@ export const GlowSecondary = styled.div`
   );
   filter: blur(145px);
   z-index: 1;
-  max-width: 450px;
+  max-width: 350px;
   width: 100%;
-  height: 30%;
-  opacity: 0.7;
+  height: 80%;
+  opacity: 0.6;
 `;
 export const TokenAmountWrapper = styled.div<{
   height: string;
   marginTop: string;
 }>`
   // width: 100%;
-  height: ${({ height }) => height};
-  background: rgb(248, 240, 255);
+  // height: ${({ height }) => height};
+  background: rgb(255, 255, 255, 0.9);
   border: 1.2px solid transparent;
   // box-shadow: inset 0 1px 2px rgba(175, 151, 196, 0.3);
   border-radius: 15px;
@@ -36,7 +71,7 @@ export const TokenAmountWrapper = styled.div<{
   &:hover {
     border: 1.2px solid rgb(244, 242, 243);
     box-shadow: inset 1px 0px 5px 1px rgba(175, 151, 196, 0.35);
-    background: rgb(248, 240, 255, 0.85);
+    background: rgb(255, 255, 255);
   } //184, 152, 233
 
   &:focus {
@@ -298,8 +333,9 @@ export const BridgeModalContainer = styled.div`
   // box-shadow: inset 0 3px 4px rgba(175, 151, 196, 0.4);
 
   padding: 6px 12px;
-  padding-bottom: 16px;
+  // padding-bottom: 28px;
   border-top: 1px solid rgb(184, 152, 233, 0.5);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 
   // border: 1px solid rgb(184, 152, 233, 0.5);
 

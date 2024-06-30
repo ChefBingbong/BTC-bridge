@@ -30,6 +30,8 @@ import PrimaryButton from "../PrimaryButton/PrimaryButton";
 import { ButtonWrapper } from "~/components/SwapModal/styles";
 import BigNumber from "bignumber.js";
 import TransactionFlowModals from "~/components/TxConfirmationModalFlow";
+import useTransactionNotification from "~/hooks/useTransactionNotification";
+import SpinningLoader from "~/components/LoadingSpinner/LoadingSpinner";
 
 const SwapButton = ({
   trade,
@@ -50,17 +52,18 @@ const SwapButton = ({
 }) => {
   const chainId = useChainId();
   const { typedValue } = useSwapState();
-
+  const { address, isConnecting, connector } = useAccount();
+  const { signTypedDataAsync, error: swapError } = useSignTypedData();
+  const { connectAsync, connectors, error: connectionError } = useConnect();
+  const { handleNewNotification } = useTransactionNotification();
   const { inputCurrency, feeCurrency, outputCurrency } =
     useSwapCurrencyOrder().tradeCurrencies;
-  const { address, isConnecting, connector } = useAccount();
-  const { connectAsync, connectors, error: connectionError } = useConnect();
+
   const {
     isPending: chainPending,
     isError: chainError,
     switchChainAsync,
   } = useSwitchChain();
-  const { signTypedDataAsync, error: swapError } = useSignTypedData();
 
   const {
     togglePendingModal,
@@ -89,10 +92,7 @@ const SwapButton = ({
   }, [connectors, connectAsync]);
 
   useEffect(() => {
-    console.log("making iitt2");
-
     if (swapError || chainError || connectionError) {
-      console.log("making iitt2");
       if (pending) togglePendingModal();
       toggleTransactionFailedModal();
     }
@@ -102,6 +102,7 @@ const SwapButton = ({
     connectionError,
     toggleTransactionFailedModal,
     togglePendingModal,
+    pending,
   ]);
 
   const connectButtonText = useMemo(() => {
@@ -198,12 +199,17 @@ const SwapButton = ({
         );
       })
       .catch((err: unknown) => {
+        handleNewNotification("Error");
         setPendingTransaction(false);
         toggleRejectedModal();
         if (err instanceof UserRejectedRequestError) {
           throw new TransactionRejectedRpcError(Error("Transaction rejected"));
         }
         throw new Error(`Swap Failed ${err as string}`);
+      })
+      .finally(() => {
+        handleNewNotification("Success");
+        setPendingTransaction(false);
       });
   }, [
     address,
@@ -217,10 +223,13 @@ const SwapButton = ({
     feeCurrency,
     trade,
     togglePendingModal,
+    handleNewNotification,
+    setPendingTransaction,
   ]);
 
   const needsToSwitchChain = useMemo(() => {
-    if (!inputCurrency || !feeCurrency || !inAllowance) return false;
+    if (!inputCurrency || !feeCurrency || !inAllowance || outAllowance)
+      return false;
 
     const currencyAmount = new BigNumber(typedValue).shiftedBy(
       inputCurrency?.decimals,
@@ -230,10 +239,10 @@ const SwapButton = ({
     );
 
     const inputAllowanceRequired = Boolean(
-      Number(inAllowance.allowance) < currencyAmount.toNumber(),
+      Number(inAllowance?.allowance) < currencyAmount.toNumber(),
     );
     const outputAllowanceRequired = Boolean(
-      Number(outAllowance.allowance) < feeCurrencyAmount.toNumber(),
+      Number(outAllowance?.allowance) < feeCurrencyAmount.toNumber(),
     );
     return (
       inputAllowanceRequired ||
@@ -282,6 +291,8 @@ const SwapButton = ({
     outputCurrency,
     inputCurrencyBalance,
     feeCurrencyBalance,
+    input,
+    output,
   ]);
 
   if (!address)
@@ -345,7 +356,7 @@ const SwapButton = ({
         >
           <Flex justifyContent="center" alignItems="center">
             <Text px="4px">{swapButtonText}</Text>
-            {pendingTransaction && <LoadingBubble />}
+            {pendingTransaction && <SpinningLoader />}
           </Flex>
         </PrimaryButton>
       </ButtonWrapper>

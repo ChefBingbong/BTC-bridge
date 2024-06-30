@@ -1,6 +1,6 @@
 import { UilCopy } from "@iconscout/react-unicons";
 import { type Currency } from "@pancakeswap/sdk";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown } from "react-feather";
 import { useTokenBalance } from "~/hooks/useBalance";
 import { ChainLogo } from "../CurrencyLogo/ChainLogo";
@@ -15,7 +15,18 @@ import {
   TokenInput,
   TokenSelectButton,
 } from "./styles";
+import { BoxItemContainer } from "../Navbar/styles";
+import { Flex } from "@pancakeswap/uikit";
+import styled from "styled-components";
 
+export const SummaryBar = styled(Flex)<{ hide: boolean; elHeight: number }>`
+  overflow-y: hidden;
+  transition: height 0.2s ease-in-out;
+  height: ${({ hide, elHeight }) => (!hide ? "0px" : "45px")};
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 8px;
+`;
 export const CurrencyInputField = ({
   currency,
   onCurrencySelect,
@@ -34,9 +45,16 @@ export const CurrencyInputField = ({
   const [isActive, setActive] = useState(false);
   const [showProivdersPopOver, setShowProvidersPopOver] =
     useState<boolean>(false);
+  const [elementHeight, setElementHeight] = useState<number>(48);
 
+  const containerRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const { balance: assetBalance } = useTokenBalance(currency?.wrapped);
 
+  const show = useMemo(
+    () => currency && currency.symbol === "WBTC",
+    [currency],
+  );
   const handleUserInput = useCallback(
     (val: string) => {
       onTypeInput(val);
@@ -49,10 +67,17 @@ export const CurrencyInputField = ({
       setActive(false);
     }, 100);
   }, []);
+
+  useEffect(() => {
+    const elRef = contentRef.current;
+    if (elRef) setElementHeight(elRef.scrollHeight);
+  }, []);
+
   return (
     <TokenAmountWrapper
-      height="100px"
+      // height="100%"
       marginTop={"5px"}
+
       // style={{
       //   background: isActive ? "rgb(233, 227, 21)" : undefined,
       // }}
@@ -91,7 +116,7 @@ export const CurrencyInputField = ({
               />
             )}
             <TokenSelectButton
-              color={currency ? "white" : "rgb(154,200,255)"}
+              color={currency ? "white" : "rgb(249,155,197)"}
               onClick={() => setShowProvidersPopOver(true)}
             >
               <ButtonContents>
@@ -146,6 +171,35 @@ export const CurrencyInputField = ({
             )}
           </div>
         </div>
+
+        <SummaryBar
+          ref={contentRef}
+          hide={show}
+          elHeight={elementHeight}
+          // alignItems="center"
+        >
+          <BoxItemContainer allignment="center">
+            <div
+              className={
+                "relative flex  h-[45px] w-full items-center justify-center rounded-lg border bg-[rgb(0,0,0,0.04)] px-4 hover:bg-[rgb(0,0,0,0.02)]  "
+              }
+              style={{
+                // background: isActive ? "rgb(240,227,254)" : undefined,
+                border: "border: 1.2px solid rgb(244, 242, 243)",
+                // boxShadow: "inset 1px 0px 1px 1px rgba(175, 151, 196, 0.35)",
+              }}
+            >
+              <input
+                value={""}
+                onChange={(e) => null}
+                className="font-500 flex-1 bg-transparent text-[14px] font-medium tracking-wide text-[#7A6EAA] outline-none placeholder:text-[#7A6EAA]"
+                placeholder={"Paste your BTC address"}
+                onMouseEnter={() => setActive(true)}
+                onMouseLeave={handleOnBlur}
+              />
+            </div>
+          </BoxItemContainer>
+        </SummaryBar>
       </TokenAmountContainer>
     </TokenAmountWrapper>
   );

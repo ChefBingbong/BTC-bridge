@@ -29,10 +29,12 @@ export const StyledNotificationWrapper = styled.div<{ show: boolean }>`
   display: flex;
   position: relative;
   overflow: hidden;
-  // padding: 0px 8px;
+  padding: 8px 18px;
   margin-bottom: 6px;
-
+  // background-color: rgba(0, 0, 0, 0.03);
+  // padding: 6px 0px
   width: 100%;
+  // border-radius: 16px;
 
   transition:
     background-color 0.6s ease,
@@ -48,10 +50,13 @@ export const Description = styled.div<{ show: boolean; elementHeight: number }>`
   max-height: ${({ show, elementHeight }) =>
     show ? `${elementHeight}px` : "0px"};
 `;
-export const StyledFeesContainer = styled(Box)<{ disabled: boolean }>`
+export const StyledFeesContainer = styled(Box)<{
+  disabled: boolean;
+  show: boolean;
+}>`
   padding-left: 4px;
   padding-right: 4px;
-  padding-top: 3px;
+  // padding-top: 3px;
 
   border-radius: 8px;
   z-index: 10;
@@ -62,6 +67,14 @@ export const StyledFeesContainer = styled(Box)<{ disabled: boolean }>`
   &:hover {
     cursor: pointer;
   }
+
+  background-color: ${({ show }) =>
+    show ? "rgba(255, 255, 255, 0.11)" : "transparent"};
+  margin: 6px 0px;
+  width: 100%;
+  border-radius: 12px;
+  transition: background-color 0.6s ease;
+
   ${({ disabled }) =>
     disabled &&
     css`
@@ -181,6 +194,7 @@ export const TradeDetails = ({
       width="100%"
       onClick={handleExpandClick}
       disabled={false}
+      show={show}
     >
       <SummaryBar
         justifyContent="space-between"
@@ -188,9 +202,9 @@ export const TradeDetails = ({
         hide={true}
         style={{
           borderRadius: "10px",
-          border: "1.5px dashed rgb(118,147,254, 0.5)",
-          margin: "4px 0px",
-          padding: "12px 8px",
+          // border: "1.5px dashed rgb(118,147,254, 0.5)",
+          margin: "0px 6px",
+          padding: "0px 12px",
         }}
       >
         <Flex alignItems="center" justifyContent="center">
