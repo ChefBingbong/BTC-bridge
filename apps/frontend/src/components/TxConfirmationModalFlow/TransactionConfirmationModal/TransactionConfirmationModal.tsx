@@ -16,6 +16,7 @@ import {
   WalletAllownceDetails,
 } from "@btc-swap/router-sdk";
 import { FeeHistory } from "viem";
+import { ButtonWrapper } from "~/components/SwapModal/styles";
 
 export const FormWrapper = styled.div`
   position: fixed;
@@ -102,13 +103,16 @@ const TxModalInner = ({
       <FeeSummary asset={asset} text={text} />
       <ProtocolBanner type={"standard"} />
       <TransactionSummary fee={0.2} asset={asset} text={text} />
-      {/* <SwapButton
-        trade={trade}
-        inAllowance={inAllowance}
-        outAllowance={outAllowance}
-        smartWalletDetails={smartWalletDetails}
-        fees={fees}
-      /> */}
+      <ButtonWrapper>
+        <PrimaryButton
+          className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[14px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
+          disabled={!trade}
+          onClick={executeTx}
+          variant="secondary"
+        >
+          {"Confirm Swap"}
+        </PrimaryButton>
+      </ButtonWrapper>
     </>
   );
 };

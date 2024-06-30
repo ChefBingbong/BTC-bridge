@@ -11,7 +11,7 @@ import { ChainLogo } from "../CurrencyLogo/ChainLogo";
 import { chains } from "~/config/wagmiConfig";
 import { useSwapctionHandlers } from "~/state/swap/hooks";
 
-const TokenSearchBar = ({
+export const TokenSearchBar = ({
   searchTerm,
   setSearchTerm,
 }: {
@@ -22,14 +22,14 @@ const TokenSearchBar = ({
     <BoxItemContainer allignment="center">
       <div
         className={
-          "relative mb-3 flex h-[45px] w-full max-w-[95%] items-center justify-center rounded-2xl border border-[rgb(214,182,263)] bg-[rgba(255,255,255,0.1)] px-4 text-white "
+          "relative mb-3 flex h-[45px] w-full max-w-[95%] items-center justify-center rounded-2xl border border-[rgb(214,182,263)] bg-[rgb(221,198,254,0.3)] px-4  "
         }
       >
         <UilSearch className=" mr-2 h-6 w-6" />
         <input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 bg-transparent text-[15px] font-medium  tracking-wide text-white outline-none placeholder:text-white"
+          className="flex-1 bg-transparent text-[15px] font-medium tracking-wide  text-[#280D5F99]  outline-none placeholder:text-[#280D5F99]"
           placeholder={"Search transactions by token"}
           onBlur={() => null}
         />
@@ -77,7 +77,7 @@ export const CurrencySelectPopOver = ({
       onClick={showProvidersOnClick}
     >
       <div className="flex w-full items-center justify-between px-6 py-4">
-        <Text fontSize="18px" fontWeight="600">
+        <Text fontSize="18px" fontWeight="600" color="#280D5F">
           Choose a Currency
         </Text>
         <UilTimes
@@ -122,14 +122,17 @@ export const CurrencySelectPopOver = ({
                   )}
                 </div>
                 <div className="flex flex-col items-start justify-center">
-                  <Text pl="12px">{token.symbol}</Text>
+                  <Text color="#280D5F" pl="12px">
+                    {token.symbol}
+                  </Text>
                   <div className="flex  items-start justify-center gap-1">
                     {/* <Text pl="12px" fontSize="13px">
                       {token.name}
                     </Text> */}
                     <Text
+                      color="#7A6EAA"
                       pl="12px"
-                      color="rgba(255,255,255,0.7)"
+                      // color="rgba(255,255,255,0.7)"
                       fontSize="13px"
                     >{`on ${network}`}</Text>
                   </div>

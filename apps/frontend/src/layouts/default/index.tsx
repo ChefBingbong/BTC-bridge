@@ -68,7 +68,7 @@ interface DefaultLayoutProps {
 
 function DefaultLayout({ children }: DefaultLayoutProps) {
   return (
-    <div className="relative  flex h-screen w-screen flex-col items-center overflow-hidden bg-[rgb(216,190,254)]  text-white ">
+    <div className="relative  flex h-screen w-screen flex-col items-center overflow-hidden bg-[rgb(216,190,254,0.8)]  text-white ">
       <Navbar />
       <BottomNavBar />
 

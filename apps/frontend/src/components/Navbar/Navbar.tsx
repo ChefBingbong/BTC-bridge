@@ -64,7 +64,7 @@ const TokenSearchBar = () => {
   return (
     <BoxItemContainer allignment={"center"} style={{ zIndex: 999 }}>
       <div
-        className={`z-12 relative flex h-[45px] w-fit max-w-[95%] items-center   justify-center rounded-2xl border border-transparent bg-[rgb(0,0,0,0.02)] bg-opacity-60 px-4  hover:border-[rgb(237,95,245)] hover:border-[rgb(247,110,255)] focus:outline-none group-focus-within:border-blue-500 group-hover:border-blue-500 lg:w-full lg:border-[rgba(184,152,233,0.85)] ${
+        className={`z-12 relative flex h-[45px] w-fit max-w-[100%] items-center   justify-center rounded-2xl border border-transparent bg-[rgb(0,0,0,0.02)] bg-opacity-60 px-4  hover:border-[rgb(237,95,245)] hover:border-[rgb(247,110,255)] focus:outline-none group-focus-within:border-blue-500 group-hover:border-blue-500 lg:w-full lg:border-[rgba(184,152,233,0.85)] ${
           dropDownActive && "border-b-0 bg-opacity-100"
         } `}
       >
@@ -83,7 +83,7 @@ const TokenSearchBar = () => {
     </BoxItemContainer>
   );
 };
-const ROUTES: string[] = ["swap"];
+const ROUTES: string[] = ["swap", "history"];
 
 export const Navbar = () => {
   const { address: account, isConnected: active } = useAccount();
@@ -158,7 +158,7 @@ const NavLinks = ({ routes }: { routes: string[] }) => {
       {routes.map((route: string) => {
         return (
           <Link
-            href={`/${route === "home" ? "" : route}`}
+            href={`/${route === "swap" ? "" : route}`}
             key={route}
             className="mx-1 hidden flex-row items-center gap-2 md:flex"
           >

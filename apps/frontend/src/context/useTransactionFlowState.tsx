@@ -5,6 +5,8 @@ import {
   useContext,
   useState,
 } from "react";
+import { Field } from "~/state/swap/actions";
+import { useSwapctionHandlers } from "~/state/swap/hooks";
 
 interface TransactionFlowStateProps {
   children: React.ReactNode;
@@ -35,15 +37,22 @@ function TransactionFlowStateProvider({ children }: TransactionFlowStateProps) {
   const [pending, setPending] = useState<boolean>(false);
   const [pendingTransaction, setPendingTransaction] = useState<boolean>(false);
 
-  const toggleTransactionFailedModal = useCallback(
-    (): void => setTransactionFailed(false),
-    [],
-  );
+  const { onUserInput } = useSwapctionHandlers();
+
+  const toggleTransactionFailedModal = useCallback((): void => {
+    setPending(false);
+    setPendingTransaction(false);
+    setTransactionFailed(false);
+  }, []);
   const togglePendingModal = useCallback((): void => {
+    onUserInput(Field.INPUT, "");
+    onUserInput(Field.FEE, "");
+    onUserInput(Field.OUTPUT, "");
+
     setConfirmation(false);
     setPending((w: boolean) => !w);
     setPendingTransaction(true);
-  }, []);
+  }, [onUserInput]);
 
   const toggleRejectedModal = useCallback((): void => {
     setPending(false);

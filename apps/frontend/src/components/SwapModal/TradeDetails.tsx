@@ -49,8 +49,8 @@ export const Description = styled.div<{ show: boolean; elementHeight: number }>`
     show ? `${elementHeight}px` : "0px"};
 `;
 export const StyledFeesContainer = styled(Box)<{ disabled: boolean }>`
-  padding-left: 10px;
-  padding-right: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
   padding-top: 3px;
 
   border-radius: 8px;
@@ -180,19 +180,21 @@ export const TradeDetails = ({
     <StyledFeesContainer
       width="100%"
       onClick={handleExpandClick}
-      disabled={
-        !prices || outputAmounts.outputLoading || !outputAmounts.outputValue
-      }
+      disabled={false}
     >
       <SummaryBar
         justifyContent="space-between"
         alignItems="center"
-        hide={
-          !!prices || outputAmounts.outputLoading || outputAmounts.outputValue
-        }
+        hide={true}
+        style={{
+          borderRadius: "10px",
+          border: "1.5px dashed rgb(118,147,254, 0.5)",
+          margin: "4px 0px",
+          padding: "12px 8px",
+        }}
       >
         <Flex alignItems="center" justifyContent="center">
-          <Text fontSize="14px" fontWeight="600">
+          <Text fontSize="14px" fontWeight="500" color="#7A6EAA">
             {`1 ${prices?.baseToken} = ${prices?.rate} ${prices?.quoteToken}`}
           </Text>
           {/* <IconButton variant="text" onClick={() => setInverted(!inverted)}>
@@ -229,7 +231,7 @@ export const TradeDetails = ({
                 <Text
                   width="max-content"
                   fontSize="13px"
-                  color="rgb(235, 235, 235)"
+                  color="#7A6EAA"
                   fontWeight="600"
                 >
                   {"Custome Fees"}

@@ -4,20 +4,22 @@ import { Flex } from "@pancakeswap/uikit";
 
 export const GlowSecondary = styled.div`
   position: absolute;
-  top: 25%;
-  left: 35%;
+  top: 23%;
+  left: 40%;
   //   bottom: 0;
-  background: rgb(254, 215, 155);
+  background: rgb(42, 205, 187, 0.8);
   background: radial-gradient(
     circle,
-    rgba(254, 215, 155, 1) 93%,
-    rgba(29, 138, 191, 0) 97%
+    rgba(42, 205, 220, 1) 6%,
+    rgba(51, 224, 220, 1) 40%,
+    rgba(51, 224, 220, 0.5270702030812324) 78%
   );
-  filter: blur(135px);
+  filter: blur(145px);
   z-index: 1;
-  max-width: 300px;
-  width: 70%;
+  max-width: 450px;
+  width: 100%;
   height: 30%;
+  opacity: 0.7;
 `;
 export const TokenAmountWrapper = styled.div<{
   height: string;
@@ -30,10 +32,16 @@ export const TokenAmountWrapper = styled.div<{
   // box-shadow: inset 0 1px 2px rgba(175, 151, 196, 0.3);
   border-radius: 15px;
   margin-top: ${({ marginTop }) => marginTop};
+
   &:hover {
     border: 1.2px solid rgb(244, 242, 243);
-    box-shadow: inset 1px 1px 5px 1px rgba(175, 151, 196, 0.35);
+    box-shadow: inset 1px 0px 5px 1px rgba(175, 151, 196, 0.35);
+    background: rgb(248, 240, 255, 0.85);
   } //184, 152, 233
+
+  &:focus {
+    background: rgb(241, 237, 245);
+  }
 `;
 
 export const TokenAmountContainer = styled.div<{
@@ -95,10 +103,10 @@ export const UniswapIcon = styled.img`
 
 export const ArrowDownContainer = styled.div`
   position: fixed;
-  top: 285px;
-  left: 28.5%;
-  background-color: rgb(214, 182, 263);
-  border: 5px solid rgb(184, 152, 233);
+  top: 290px;
+  left: 48.7%;
+  background-color: rgb(248, 240, 255);
+  border: 5px solid rgb(172, 201, 242);
   border-radius: 10px;
 
   display: flex;
@@ -285,19 +293,20 @@ export const BridgeModalContainer = styled.div`
   width: 460px;
   // height: 100%;
   // color: White;
-  background-color: rgba(184, 152, 233, 0.95);
+  background-color: transparent;
   text-align: right;
   // box-shadow: inset 0 3px 4px rgba(175, 151, 196, 0.4);
 
-  padding: 6px 7px;
-  border-top: 1px solid rgb(214, 212, 245);
+  padding: 6px 12px;
+  padding-bottom: 8px;
+  border-top: 1px solid rgb(184, 152, 233, 0.5);
+
+  // border: 1px solid rgb(184, 152, 233, 0.5);
+
   border-radius: 20px;
   box-shadow:
-    inset 0 -5px 10px -5px rgba(29, 64, 76, 0.4),
-    -15px 15px 2px rgba(169, 134, 206, 0.1),
-    -10px 10px 2px rgba(169, 134, 206, 0.1),
-    -5px 5px 5px rgba(169, 134, 206, 0.1);
-
+    inset 0px -2px 3px 0px rgba(184, 152, 233, 0.65),
+    inset 0px 2px 3px 0px rgba(255, 255, 255, 0.65);
   //   margin: 30px auto 0;
   transition: height 3s ease-out;
   position: relative;
@@ -329,7 +338,7 @@ export const NetworkItem = styled.div<{ selected: boolean }>`
   display: flex;
 
   &:hover {
-    background-color: rgb(255, 255, 255, 0.2);
+    background-color: rgb(0, 0, 0, 0.02);
     cursor: pointer;
   }
   opacity: ${({ selected }) => (selected ? 0.4 : 1)};

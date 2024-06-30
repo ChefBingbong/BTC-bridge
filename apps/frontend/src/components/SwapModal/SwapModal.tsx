@@ -1,7 +1,12 @@
-import { UilAngleDown, UilCopy, UilSpinner } from "@iconscout/react-unicons";
+import {
+  UilAngleDown,
+  UilCopy,
+  UilSpinner,
+  UilSearch,
+} from "@iconscout/react-unicons";
 import { CurrencyAmount, type Currency } from "@pancakeswap/sdk";
 import type React from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { ChevronDown } from "react-feather";
 import { useAccount, useChainId, useSignTypedData } from "wagmi";
 import { useTokenBalance } from "~/hooks/useBalance";
@@ -9,7 +14,7 @@ import { NativeBtc } from "~/config/NativeBtc";
 import PrimaryButton from "../Button/PrimaryButton/PrimaryButton";
 import { ChainLogo } from "../CurrencyLogo/ChainLogo";
 import { CurrencyLogo } from "../CurrencyLogo/CurrencyLogo";
-import { CurrencySelectPopOver } from "./CurrencySelectPopOver";
+import { CurrencySelectPopOver, TokenSearchBar } from "./CurrencySelectPopOver";
 import { formatAmount } from "~/utils/misc";
 import {
   ArrowDownContainer,
@@ -56,42 +61,17 @@ import { TradeDetails } from "./TradeDetails";
 import TransactionFlowModals from "../TxConfirmationModalFlow";
 import { useTransactionFlow } from "~/context/useTransactionFlowState";
 import SwapButton from "../Button/SwapButton/SwapButton";
-
-export const BREAKPOINTS = {
-  xs: 396,
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-  xxl: 1536,
-  xxxl: 1920,
-};
-
-export enum ConfirmModalState {
-  REVIEWING = -1,
-  APPROVING_TOKEN = 0,
-  PERMITTING = 1,
-  PENDING_CONFIRMATION = 2,
-  SIGNED = 3,
-  EXECUTING = 4,
-  COMPLETED = 5,
-  FAILED = 6,
-}
+import BigNumber from "bignumber.js";
+import useDebounce from "~/hooks/useDebounce";
+import { Box, Flex, Text } from "@pancakeswap/uikit";
+import Toggle from "../Toggle/Toggle";
+import { BoxItemContainer } from "../Navbar/styles";
+import { BASES_TO_CHECK_TRADES_AGAINST } from "@pancakeswap/smart-router";
 
 const SwapModal = () => {
-  const { address, connector } = useAccount();
-  const {
-    toggleConfirmationModal,
-    togglePendingModal,
-    toggleRejectedModal,
-    toggleSubmittedModal,
-    pendingTransaction,
-    setPendingTransaction,
-  } = useTransactionFlow();
-  const chainId = useChainId();
-
-  const { signTypedDataAsync } = useSignTypedData();
+  const { address } = useAccount();
   const { typedValue } = useSwapState();
+  const [isActive, setActive] = useState(false);
 
   const { inputCurrency, outputCurrency, feeCurrency } =
     useSwapCurrencyOrder().tradeCurrencies;
@@ -115,18 +95,27 @@ const SwapModal = () => {
   const { data: inAllowance } = useAllowance(inputCurrency, address);
   const { data: outAllowance } = useAllowance(feeCurrency, address);
 
+  const amountInBE = BigNumber(typedValue).shiftedBy(
+    inputCurrency?.decimals ?? 18,
+  );
+  const deferQuotientRaw = useDeferredValue(amountInBE.toString());
+  const deferQuotient = useDebounce(deferQuotientRaw, 500);
+
   const { data: trade, isLoading: tradeLoading } = useSmartRouterBestTrade({
     toAsset: outputCurrency,
     fromAsset: inputCurrency,
     chainId: inputCurrency?.chainId,
     account: address,
-    amount: typedValue,
+    amount: deferQuotient,
   });
 
   const { data: smartWalletDetails } = useSmartWalletDetails(
     address!,
     inputCurrency?.chainId,
   );
+  console.log(inputCurrency?.decimals);
+  console.log(deferQuotientRaw);
+  console.log(deferQuotient);
 
   const handleTypeInput = useCallback(
     (value: string) => onUserInput(Field.INPUT, value),
@@ -138,137 +127,24 @@ const SwapModal = () => {
   );
   const { input, output, fees } = useSwapCurrencyAmounts(trade, tradeLoading);
 
-  const swap = useCallback(async () => {
-    if (
-      !trade ||
-      !address ||
-      !inAllowance ||
-      !outAllowance ||
-      !feeCurrency ||
-      !smartWalletDetails
-    )
-      return;
-    togglePendingModal();
-    const inputAsset = trade.inputAmount.currency.wrapped;
-    const options = getSmartWalletOptions(
-      address,
-      outAllowance,
-      inAllowance,
-      chainId,
-      feeCurrency,
-      RouterTradeType.SmartWalletTradeWithPermit2,
-      smartWalletDetails as never,
-    );
-    const swapCallParams = SmartWalletRouter.buildSmartWalletTrade(
-      trade,
-      options,
-    );
-
-    const externalOps = swapCallParams.externalUserOps;
-    const { domain, types, values } = swapCallParams.smartWalletTypedData;
-
-    const windowClient = await connector?.getClient?.({
-      chainId: inputAsset.chainId,
-    });
-
-    if (externalOps.length > 0) {
-      for (const externalOp of externalOps) {
-        await SmartWalletRouter.sendTransactionFromRelayer(
-          inputAsset.chainId,
-          externalOp as never,
-          {
-            externalClient: windowClient as any,
-          },
-        );
-      }
-    }
-    await signTypedDataAsync({
-      account: address,
-      domain,
-      types,
-      message: values,
-      primaryType: "ECDSAExec",
-    })
-      .then(async (signature) => {
-        toggleSubmittedModal();
-        setPendingTransaction(true);
-
-        handleTypeInput("");
-        handleTypeOutput("");
-
-        const signatureEncoded = defaultAbiCoder.encode(
-          ["uint256", "bytes"],
-          [chainId, signature],
-        );
-
-        if (values.nonce === 0n) {
-          const walletDeploymentOp =
-            await SmartWalletRouter.encodeWalletCreationOp(
-              [address],
-              Deployments[inputAsset.chainId].ECDSAWalletFactory as any,
-            );
-
-          await SmartWalletRouter.sendTransactionFromRelayer(
-            inputAsset.chainId,
-            walletDeploymentOp as any,
-          );
-        }
-        const tradeEncoded = await SmartWalletRouter.encodeSmartRouterTrade(
-          [values.userOps, values.allowanceOp, signatureEncoded as any],
-          smartWalletDetails?.address,
-          inputAsset.chainId,
-        );
-
-        if (
-          swapCallParams.config.SmartWalletTradeType ===
-          RouterTradeType.SmartWalletTradeWithPermit2
-        ) {
-          return await SmartWalletRouter.sendTransactionFromRelayer(
-            inputAsset.chainId,
-            tradeEncoded as any,
-          );
-        }
-        return await SmartWalletRouter.sendTransactionFromRelayer(
-          inputAsset.chainId,
-          tradeEncoded as any,
-          {
-            externalClient: windowClient as any,
-          },
-        );
-      })
-      .catch((err: unknown) => {
-        setPendingTransaction(false);
-        toggleRejectedModal();
-        if (err instanceof UserRejectedRequestError) {
-          throw new TransactionRejectedRpcError(Error("Transaction rejected"));
-        }
-        throw new Error(`Swap Failed ${err as string}`);
-      });
-  }, [
-    address,
-    signTypedDataAsync,
-    connector,
-    inAllowance,
-    outAllowance,
-    smartWalletDetails,
-    chainId,
-    feeCurrency,
-    onUserInput,
-    trade,
-  ]);
-
+  const handleOnBlur = useCallback(() => {
+    setTimeout(() => {
+      setActive(false);
+    }, 100);
+  }, []);
   return (
     <>
-      <div className="grid h-full grid-rows-9">
-        <div className="row-span-2 " />
-        <div className="z-10 row-span-4 -m-12 flex h-full items-center justify-center gap-8">
-          <div className=" my-auto flex w-full justify-center gap-8">
-            <div className=" grid grid-cols-8 gap-9">
-              <div className="col-span-3">
+      <div className="grid h-screen w-full grid-rows-6">
+        <div className=" row-span-1 " />
+
+        <div className="z-10 row-span-5 flex  items-center justify-center">
+          <div className="  h-full ">
+            <div className=" grid-cols  grid">
+              <div className="col-span-3 ">
                 <BridgeModalContainer>
                   <div className="flex justify-between px-2">
                     <div className="text-[rgb(220,248,253)]">Swap</div>
-                    <CloseIcon color="rgb(240, 240, 240)" />
+                    <CloseIcon color="rgb(172, 201, 242)" />
                     <ArrowDownContainer onClick={onSwitchTokens}>
                       <UilAngleDown className={"h-6 w-6 "} />
                     </ArrowDownContainer>
@@ -297,38 +173,49 @@ const SwapModal = () => {
                     inputValue={fees.outputValueMinusFees}
                     currencyLoading={output.outputLoading}
                   />
+                  <Flex width="100%" mt="6px">
+                    <BoxItemContainer allignment="center">
+                      <div
+                        className={
+                          "relative flex  h-[50px] w-full items-center justify-center rounded-xl border border-[rgb(214,182,263)] bg-[rgb(244,240,255)] px-4  "
+                        }
+                        style={
+                          {
+                            // background: isActive ? "rgb(240,227,254)" : undefined,
+                          }
+                        }
+                      >
+                        <input
+                          value={""}
+                          onChange={(e) => null}
+                          className="font-500 flex-1 bg-transparent text-[14px] font-medium tracking-wide text-[#7A6EAA] outline-none placeholder:text-[#7A6EAA]"
+                          placeholder={"Paste your BTC address"}
+                          onMouseEnter={() => setActive(true)}
+                          onMouseLeave={handleOnBlur}
+                        />
+                      </div>
+                    </BoxItemContainer>
+                  </Flex>
+
                   <TradeDetails
                     trade={trade}
                     inputAmounts={input}
                     outputAmounts={output}
                     feeAmounts={fees}
                   />
-                  {/* <ButtonWrapper>
-                    <PrimaryButton
-                      className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[14px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
-                      disabled={!address}
-                      onClick={toggleConfirmationModal}
-                      variant="secondary"
-                    >
-                      {pendingTransaction
-                        ? "Swap Processing"
-                        : !address
-                          ? "Connect Wallet"
-                          : typedValue !== ""
-                            ? `Swap ${typedValue} ${inputCurrency?.symbol}`
-                            : "Enter An Amount"}
-                    </PrimaryButton>
-                  </ButtonWrapper> */}
+
                   <SwapButton
                     trade={trade}
                     inAllowance={inAllowance}
                     outAllowance={outAllowance}
                     smartWalletDetails={smartWalletDetails}
+                    input={input}
+                    output={output}
                     fees={fees}
                   />
                 </BridgeModalContainer>
               </div>
-              <div className="col-span-5 flex  w-full justify-end">
+              {/* <div className="col-span-5 flex  w-full justify-end">
                 <TransactionsContainer>
                   <div className="flex flex-col justify-center">
                     <span className="font-semobold text-[15px] text-white">
@@ -339,25 +226,12 @@ const SwapModal = () => {
                     <TransactionRowontainer></TransactionRowontainer>
                   </div>
                 </TransactionsContainer>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
-        <div className="row-span-5" />
-        {trade && fees?.fees && inputCurrency && (
-          <TransactionFlowModals
-            trade={trade}
-            asset={inputCurrency}
-            fees={fees.fees}
-            buttonState={"Transaction"}
-            text={"Swap"}
-            inAllowance={inAllowance}
-            outAllowance={outAllowance}
-            smartWalletDetails={smartWalletDetails}
-            executeTx={swap}
-          />
-        )}
-        <GlowSecondary />
+
+        {/* <GlowSecondary /> */}
       </div>
     </>
   );

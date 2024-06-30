@@ -7,7 +7,9 @@ export const useSmartWalletDetails = (address: Address, _chainId?: number) => {
   return useQuery({
     queryKey: ['smartWalletDetails', address, chainOverride],
     queryFn: async (): Promise<{ address?: Address; nonce?: bigint; wallet: any } | undefined> => {
-      if (!address) return undefined
+      if (!address) {
+        throw new Error('addres is not provided')
+      }
       return SmartWalletRouter.getUserSmartWalletDetails(address, chainOverride)
     },
     retry: false,

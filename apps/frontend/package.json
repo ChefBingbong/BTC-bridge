@@ -10,8 +10,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@btc-swap/router-sdk": "workspace:*",
     "@btc-swap/react": "workspace:*",
+    "@btc-swap/router-sdk": "workspace:*",
     "@ethersproject/abi": "^5.4.7",
     "@iconscout/react-unicons": "^2.0.2",
     "@metamask/jazzicon": "^2.0.0",
@@ -27,6 +27,7 @@
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.45.1",
     "bignumber.js": "^9.1.2",
+    "dayjs": "^1.11.11",
     "formatFractions": "link:@pancakeswap/utils/formatFractions",
     "geist": "^1.3.0",
     "graphql-request": "^7.1.0",

@@ -11,7 +11,9 @@ export const useSmartWalletFees = (
   return useQuery({
     queryKey: ['fees-query', inputCurrency?.symbol, outputCurrency?.symbol, feeCurrency?.symbol, amount],
     queryFn: async () => {
-      if (!feeCurrency || !inputCurrency || !outputCurrency || amount === '') return undefined
+      if (!feeCurrency || !inputCurrency || !outputCurrency || amount === '') {
+        throw new Error('fee query params are not defined')
+      }
 
       return SmartWalletRouter.estimateSmartWalletFees({
         feeAsset: feeCurrency?.symbol,

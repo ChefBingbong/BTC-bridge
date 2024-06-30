@@ -31,6 +31,7 @@ export const CurrencyInputField = ({
   currencyLoading: boolean;
   disabled: boolean;
 }) => {
+  const [isActive, setActive] = useState(false);
   const [showProivdersPopOver, setShowProvidersPopOver] =
     useState<boolean>(false);
 
@@ -42,8 +43,20 @@ export const CurrencyInputField = ({
     },
     [onTypeInput],
   );
+
+  const handleOnBlur = useCallback(() => {
+    setTimeout(() => {
+      setActive(false);
+    }, 100);
+  }, []);
   return (
-    <TokenAmountWrapper height="100px" marginTop={"5px"}>
+    <TokenAmountWrapper
+      height="100px"
+      marginTop={"5px"}
+      // style={{
+      //   background: isActive ? "rgb(233, 227, 21)" : undefined,
+      // }}
+    >
       <CurrencySelectPopOver
         setShowProvidersPopOver={setShowProvidersPopOver}
         showProivdersPopOver={showProivdersPopOver}
@@ -60,6 +73,8 @@ export const CurrencyInputField = ({
               onChange={(e) => {
                 handleUserInput(e.target.value);
               }}
+              onFocus={() => setActive(true)}
+              onBlur={handleOnBlur}
               value={inputValue}
               required
               type="number"
@@ -116,7 +131,7 @@ export const CurrencyInputField = ({
               {currencyLoading && (
                 <div className="flex h-[16px] w-[16px] rounded-full bg-gray-300">
                   <div
-                    className="animate-spin-slow-fast-slow h-[16px] w-[16px] items-center justify-center rounded-full border-[3px] border-white border-b-[rgb(219,104,147)]"
+                    className="h-[16px] w-[16px] animate-spin-slow-fast-slow items-center justify-center rounded-full border-[3px] border-white border-b-[rgb(219,104,147)]"
                     style={{
                       boxShadow:
                         "inset 0 0 5px rgba(109, 72, 195, 0.95), 0 2.5px 3.5px  rgba(119, 82, 205, 0.25)",

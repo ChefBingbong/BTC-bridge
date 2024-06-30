@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const FilterdNetworkWrapper = styled(Flex)<{ showPopOver: boolean }>`
   position: absolute;
   width: 100%;
-  background: rgb(184, 152, 233);
+  background: rgb(248, 240, 255);
   margin: 0px -13px;
   //   padding: 12px 12px;
   min-height: 300px;
@@ -12,11 +12,12 @@ export const FilterdNetworkWrapper = styled(Flex)<{ showPopOver: boolean }>`
   flex-direction: column;
   height: max-content;
   z-index: 9999;
-  transition: bottom 0.3s ease-in-out;
+  transition: bottom 0.4s ease-in-out;
   bottom: ${({ showPopOver }) => (!showPopOver ? "-100%" : "0%")};
   border-top-right-radius: 24px;
   border-top-left-radius: 24px;
-  box-shadow: 6px 20px 12px 8px rgba(74, 74, 104, 0.1);
+  border-top: 1.2px solid rgb(244, 242, 243);
+  box-shadow: inset 0px 1px 5px 2px rgba(175, 151, 196, 0.45);
   height: 90%;
 `;
 export const NetworkFilterOverlay = styled(Flex)<{ showPopOver: boolean }>`

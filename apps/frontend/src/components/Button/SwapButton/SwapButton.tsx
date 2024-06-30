@@ -7,10 +7,10 @@ import {
   WalletAllownceDetails,
 } from "@btc-swap/router-sdk";
 import { defaultAbiCoder } from "@ethersproject/abi";
-import { TradeType } from "@pancakeswap/sdk";
+import { CurrencyAmount, TradeType } from "@pancakeswap/sdk";
 import { SmartRouterTrade } from "@pancakeswap/smart-router";
 import { Flex, Text } from "@pancakeswap/uikit";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { TransactionRejectedRpcError, UserRejectedRequestError } from "viem";
 import {
   useAccount,
@@ -28,6 +28,8 @@ import { getSmartWalletOptions } from "~/utils/getSmartWalletOptions";
 import { formatAmount } from "~/utils/misc";
 import PrimaryButton from "../PrimaryButton/PrimaryButton";
 import { ButtonWrapper } from "~/components/SwapModal/styles";
+import BigNumber from "bignumber.js";
+import TransactionFlowModals from "~/components/TxConfirmationModalFlow";
 
 const SwapButton = ({
   trade,
@@ -35,11 +37,15 @@ const SwapButton = ({
   outAllowance,
   smartWalletDetails,
   fees,
+  input,
+  output,
 }: {
   trade: SmartRouterTrade<TradeType>;
   inAllowance: WalletAllownceDetails;
   outAllowance: WalletAllownceDetails;
   smartWalletDetails: SmartWalletDetails;
+  input: any;
+  output: any;
   fees: FeeResponse;
 }) => {
   const chainId = useChainId();
@@ -60,7 +66,10 @@ const SwapButton = ({
     togglePendingModal,
     toggleRejectedModal,
     toggleSubmittedModal,
+    toggleTransactionFailedModal,
+    toggleConfirmationModal,
     pendingTransaction,
+    pending,
     setPendingTransaction,
   } = useTransactionFlow();
 
@@ -79,6 +88,22 @@ const SwapButton = ({
     }
   }, [connectors, connectAsync]);
 
+  useEffect(() => {
+    console.log("making iitt2");
+
+    if (swapError || chainError || connectionError) {
+      console.log("making iitt2");
+      if (pending) togglePendingModal();
+      toggleTransactionFailedModal();
+    }
+  }, [
+    chainError,
+    swapError,
+    connectionError,
+    toggleTransactionFailedModal,
+    togglePendingModal,
+  ]);
+
   const connectButtonText = useMemo(() => {
     if (!address) return "Connect Wallet";
     if (isConnecting) return "Waiting For Conection";
@@ -90,7 +115,6 @@ const SwapButton = ({
     if (!trade || !smartWalletDetails) return;
 
     togglePendingModal();
-
     const inputAsset = trade.inputAmount.currency.wrapped;
     const options = getSmartWalletOptions(
       address,
@@ -192,25 +216,37 @@ const SwapButton = ({
     chainId,
     feeCurrency,
     trade,
+    togglePendingModal,
   ]);
 
-  const swapButtonText = useMemo(() => {
-    if (swapError) return "Swap Failed!.";
-    if (pendingTransaction) return "Processing Trade";
-    if (!inputCurrency) return "Select a Token To Swap";
-    if (!outputCurrency) return "Select a token to Buy";
-    if (inputCurrency && outputCurrency && !trade && typedValue === "") {
-      return "Enter an Amount To Swap";
-    }
-    if (trade) return "Execute Swap";
-    return "Switch Networks";
+  const needsToSwitchChain = useMemo(() => {
+    if (!inputCurrency || !feeCurrency || !inAllowance) return false;
+
+    const currencyAmount = new BigNumber(typedValue).shiftedBy(
+      inputCurrency?.decimals,
+    );
+    const feeCurrencyAmount = new BigNumber(fees.gasCostInQuoteToken).shiftedBy(
+      feeCurrency?.decimals,
+    );
+
+    const inputAllowanceRequired = Boolean(
+      Number(inAllowance.allowance) < currencyAmount.toNumber(),
+    );
+    const outputAllowanceRequired = Boolean(
+      Number(outAllowance.allowance) < feeCurrencyAmount.toNumber(),
+    );
+    return (
+      inputAllowanceRequired ||
+      (outputAllowanceRequired && chainId !== inputCurrency?.chainId)
+    );
   }, [
-    trade,
-    typedValue,
-    swapError,
-    pendingTransaction,
     inputCurrency,
-    outputCurrency,
+    feeCurrency,
+    inAllowance,
+    outAllowance,
+    typedValue,
+    chainId,
+    fees,
   ]);
 
   const switchChainTextText = useMemo(() => {
@@ -218,6 +254,35 @@ const SwapButton = ({
     if (chainError) return "Failed to Swicth Networks";
     return "Switch Networks";
   }, [chainPending, chainError]);
+
+  const swapButtonText = useMemo(() => {
+    const inputBal = Number(inputCurrencyBalance);
+    const feeBal = Number(feeCurrencyBalance);
+
+    if (inputBal < Number(typedValue)) return "Insufficient Balance";
+    if (feeBal < fees.gasCostInQuoteToken) return "Insufficient Fee Balance";
+    if (swapError) return "Swap Failed!.";
+    if (input?.inputLoading || output?.outputLoading)
+      return "Fetching Best Price";
+    if (pendingTransaction) return "Processing Trade";
+    if (!inputCurrency) return "Select a Token To Swap";
+    if (!outputCurrency) return "Select a token to Buy";
+    if (inputCurrency && outputCurrency && !trade && typedValue === "") {
+      return "Enter an Amount To Swap";
+    }
+    if (trade) return "Execute Swap";
+    return "Swap";
+  }, [
+    fees,
+    trade,
+    typedValue,
+    swapError,
+    pendingTransaction,
+    inputCurrency,
+    outputCurrency,
+    inputCurrencyBalance,
+    feeCurrencyBalance,
+  ]);
 
   if (!address)
     return (
@@ -236,17 +301,18 @@ const SwapButton = ({
       </ButtonWrapper>
     );
 
-  if (
-    inAllowance?.allowance === 0n ||
-    (outAllowance?.allowance === 0n && chainId !== inputCurrency?.chainId) ||
-    chainId !== feeCurrency?.chainId
-  )
+  if (needsToSwitchChain)
     return (
       <ButtonWrapper>
         <PrimaryButton
           className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[14px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
           disabled={chainError || chainPending}
-          onClick={enableConnection}
+          onClick={() =>
+            switchChainAsync({
+              chainId: inputCurrency?.chainId,
+              connector: connectors[0],
+            })
+          }
           variant="secondary"
         >
           <Flex justifyContent="center" alignItems="center">
@@ -256,38 +322,25 @@ const SwapButton = ({
       </ButtonWrapper>
     );
 
-  if (
-    (inputCurrencyBalance && inputCurrencyBalance.toString() < typedValue) ||
-    (feeCurrencyBalance &&
-      Number(feeCurrencyBalance) < fees.gasCostInQuoteToken)
-  )
-    return (
-      <ButtonWrapper>
-        <PrimaryButton
-          className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[14px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
-          disabled={address || isConnecting}
-          onClick={async () =>
-            await switchChainAsync({
-              chainId: inputCurrency?.chainId,
-              connector: connectors[0],
-            })
-          }
-          variant="secondary"
-        >
-          <Flex justifyContent="center" alignItems="center">
-            <Text px="4px">Insufficient Balance</Text>
-          </Flex>
-        </PrimaryButton>
-      </ButtonWrapper>
-    );
-
   return (
     <>
+      <TransactionFlowModals
+        trade={trade}
+        asset={inputCurrency}
+        fees={fees}
+        buttonState={"Transaction"}
+        text={"Swap"}
+        inAllowance={inAllowance}
+        outAllowance={outAllowance}
+        smartWalletDetails={smartWalletDetails}
+        executeTx={swap}
+      />
+
       <ButtonWrapper>
         <PrimaryButton
           className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[14px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
           disabled={!trade || !smartWalletDetails}
-          onClick={swap}
+          onClick={toggleConfirmationModal}
           variant="secondary"
         >
           <Flex justifyContent="center" alignItems="center">

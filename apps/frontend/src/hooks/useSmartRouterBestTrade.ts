@@ -55,29 +55,27 @@ export const useSmartRouterBestTrade = <selectData = GetTradeQuoteReturnType>(
   parameters: UseTradeQuoteParameters<selectData>,
 ) => {
   const { chainId, fromAsset, toAsset, amount, account } = parameters;
-
-  const amountInBE = BigNumber(amount).shiftedBy(fromAsset?.decimals ?? 18);
-  const deferQuotientRaw = useDeferredValue(amountInBE.toString());
-  const deferQuotient = useDebounce(deferQuotientRaw, 500);
-
+  console.log(Boolean(fromAsset && toAsset && account && chainId && amount));
   return useQuery({
     queryKey: getTradeQuoteQueryKey([
       {
         chainId: chainId as never,
         toAsset: toAsset?.symbol,
         fromAsset: fromAsset?.symbol,
-        amount: deferQuotient,
+        amount: amount,
         account,
       },
     ]),
-    enabled: !!(fromAsset && deferQuotient && toAsset && account && chainId),
+    enabled: Boolean(fromAsset && toAsset && account && chainId && amount),
     queryFn: async ({ queryKey }) => {
       const params = queryKey[1];
 
-      if (!params.amount || !params.fromAsset || !params.toAsset)
-        return undefined;
-      if (!toAsset || !fromAsset || !amount || !chainId || !account)
-        return undefined;
+      if (!params.amount || !params.fromAsset || !params.toAsset) {
+        throw new Error("missing params for trade query");
+      }
+      if (!toAsset || !fromAsset || !amount || !chainId || !account) {
+        throw new Error("missing params for trade query");
+      }
 
       const quoteProvider = SmartRouter.createQuoteProvider({
         onChainProvider: () => publicClient({ chainId }) as never,
@@ -101,10 +99,7 @@ export const useSmartRouterBestTrade = <selectData = GetTradeQuoteReturnType>(
       ]);
       const pools = [...v2Pools, ...v3Pools];
 
-      const deferAmount = CurrencyAmount.fromRawAmount(
-        fromAsset,
-        deferQuotient,
-      );
+      const deferAmount = CurrencyAmount.fromRawAmount(fromAsset, amount);
       const res = await SmartRouter.getBestTrade(
         deferAmount,
         toAsset,

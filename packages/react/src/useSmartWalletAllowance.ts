@@ -7,7 +7,9 @@ export const useAllowance = (inputCurrency: Currency | undefined, address: Addre
   return useQuery({
     queryKey: ['allowance-query', address, inputCurrency?.wrapped.address],
     queryFn: async () => {
-      if (!inputCurrency || !address) return undefined
+      if (!inputCurrency || !address) {
+        throw new Error('allowance query params are not defined')
+      }
 
       return SmartWalletRouter.getContractAllowance(inputCurrency, address)
     },
