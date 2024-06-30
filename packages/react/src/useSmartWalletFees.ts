@@ -20,7 +20,8 @@ export const useSmartWalletFees = (
       })
     },
     refetchInterval: 10000,
-    retry: false,
+    retry: 1500,
+    staleTime: 1500,
     refetchOnWindowFocus: false,
     enabled: Boolean(inputCurrency && outputCurrency && feeCurrency && amount !== ''),
   })

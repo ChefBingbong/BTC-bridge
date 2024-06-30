@@ -54,6 +54,7 @@ export const CurrencyInputField = ({
         <div className="h-full flex-col items-center justify-center gap-4">
           <InfoWrapper>
             <TokenInput
+              loading={currencyLoading}
               disabled={disabled}
               placeholder={"0.0"}
               onChange={(e) => {

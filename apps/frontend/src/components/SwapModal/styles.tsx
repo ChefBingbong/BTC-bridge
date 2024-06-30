@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { Settings } from "react-feather";
 
 export const GlowSecondary = styled.div`
@@ -173,14 +173,38 @@ export const InfoWrapper = styled.div`
   // background: white;
 `;
 
-export const TokenInput = styled.input`
+export const TokenInput = styled.input<{ loading: boolean }>`
   font-family: "Inter custom", sans-serif;
   width: 100%;
-  background: transparent;
+  // background: transparent;
   border: none;
   font-size: 30px;
   color: #adadad;
   outline: none;
+  cursor: auto;
+
+  font-size: 35px;
+  animation-fill-mode: both;
+  background: ${({ loading }) =>
+    loading
+      ? `linear-gradient(
+    to left,
+    rgb(167, 160, 173) 25%,
+    rgb(240, 240, 240) 50%,
+    rgb(167, 160, 173) 75%
+  )`
+      : "#a7a0ad"};
+  will-change: background-position;
+  background-size: 400%;
+  -webkit-background-clip: text;
+  color: transparent;
+  caret-color: #adadad;
+
+  ${({ loading }) =>
+    loading &&
+    css`
+      animation: ${loadingAnimation} 1.5s infinite;
+    `}
 `;
 
 export const TokenSelectButton = styled.div`
@@ -301,4 +325,53 @@ export const NetworkItem = styled.div<{ selected: boolean }>`
     cursor: pointer;
   }
   opacity: ${({ selected }) => (selected ? 0.4 : 1)};
+`;
+
+export const loadingAnimation = keyframes`
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+`;
+
+export const LoadingBubble = styled.div`
+  border-radius: 12px;
+  height: 24px;
+  width: 50%;
+  animation: ${loadingAnimation} 1.5s infinite;
+  animation-fill-mode: both;
+  background: linear-gradient(
+    to left,
+    rgb(15, 25, 55) 25%,
+    rgb(7, 13, 31) 50%,
+    rgb(15, 25, 55) 75%
+  );
+  will-change: background-position;
+  background-size: 400%;
+`;
+
+export const GlowingText = styled.span`
+  font-size: 35px;
+  animation-fill-mode: both;
+  background: ${(props: any) =>
+    props.loading
+      ? `linear-gradient(
+    to left,
+    rgb(98, 107, 128) 25%,
+    rgb(255, 255, 255) 50%,
+    rgb(98, 107, 128) 75%
+  )`
+      : "white"};
+  will-change: background-position;
+  background-size: 400%;
+  -webkit-background-clip: text;
+  color: transparent;
+
+  ${(props: any) =>
+    props.loading &&
+    css`
+      animation: ${loadingAnimation} 1s infinite;
+    `}
 `;
