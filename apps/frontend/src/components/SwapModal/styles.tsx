@@ -298,14 +298,14 @@ export const BridgeModalContainer = styled.div`
   // box-shadow: inset 0 3px 4px rgba(175, 151, 196, 0.4);
 
   padding: 6px 12px;
-  padding-bottom: 8px;
+  padding-bottom: 16px;
   border-top: 1px solid rgb(184, 152, 233, 0.5);
 
   // border: 1px solid rgb(184, 152, 233, 0.5);
 
   border-radius: 20px;
   box-shadow:
-    inset 0px -2px 3px 0px rgba(184, 152, 233, 0.65),
+    inset 0px -2px 4px 0px rgba(184, 152, 233, 0.65),
     inset 0px 2px 3px 0px rgba(255, 255, 255, 0.65);
   //   margin: 30px auto 0;
   transition: height 3s ease-out;
