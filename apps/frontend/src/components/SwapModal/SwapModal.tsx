@@ -24,6 +24,7 @@ import {
   TokenAmountWrapper,
   TokenInput,
   TokenSelectButton,
+  TransactionRowontainer,
   TransactionsContainer,
 } from "./styles";
 import { useQuery } from "@tanstack/react-query";
@@ -54,6 +55,7 @@ import { useSwapCurrencyOrder } from "~/hooks/useSwapCurrencies";
 import { TradeDetails } from "./TradeDetails";
 import TransactionFlowModals from "../TxConfirmationModalFlow";
 import { useTransactionFlow } from "~/context/useTransactionFlowState";
+import SwapButton from "../Button/SwapButton/SwapButton";
 
 export const BREAKPOINTS = {
   xs: 396,
@@ -257,78 +259,106 @@ const SwapModal = () => {
 
   return (
     <>
-      <TransactionFlowModals
-        asset={inputCurrency}
-        buttonState={"Transaction"}
-        text={"Swap"}
-        executeTx={swap}
-      />
-      <div className="   mt-[85px] flex  items-center justify-center">
-        <div className="z-10 flex w-[70%] items-center justify-center gap-8">
-          <BridgeModalContainer>
-            <div className="flex justify-between px-2">
-              <div className="text-[rgb(220,248,253)]">Swap</div>
-              <CloseIcon color="rgb(240, 240, 240)" />
-              <ArrowDownContainer onClick={onSwitchTokens}>
-                <UilAngleDown className={"h-6 w-6 "} />
-              </ArrowDownContainer>
+      <div className="grid h-full grid-rows-9">
+        <div className="row-span-2 " />
+        <div className="z-10 row-span-4 -m-12 flex h-full items-center justify-center gap-8">
+          <div className=" my-auto flex w-full justify-center gap-8">
+            <div className=" grid grid-cols-8 gap-9">
+              <div className="col-span-3">
+                <BridgeModalContainer>
+                  <div className="flex justify-between px-2">
+                    <div className="text-[rgb(220,248,253)]">Swap</div>
+                    <CloseIcon color="rgb(240, 240, 240)" />
+                    <ArrowDownContainer onClick={onSwitchTokens}>
+                      <UilAngleDown className={"h-6 w-6 "} />
+                    </ArrowDownContainer>
+                  </div>
+                  <CurrencyInputField
+                    currency={inputCurrency}
+                    onCurrencySelect={handleInputSelect}
+                    onTypeInput={handleTypeInput}
+                    inputValue={input.inputValue}
+                    currencyLoading={input.inputLoading}
+                  />
+                  <CurrencyInputField
+                    currency={feeCurrency}
+                    onCurrencySelect={handleFeeSelect}
+                    onTypeInput={() => null}
+                    inputValue={
+                      formatAmount(fees?.fees?.gasCostInBaseToken) ?? ""
+                    }
+                    disabled
+                    currencyLoading={fees.feesLoading}
+                  />
+                  <CurrencyInputField
+                    currency={outputCurrency}
+                    onCurrencySelect={handleOutputSelect}
+                    onTypeInput={handleTypeOutput}
+                    inputValue={fees.outputValueMinusFees}
+                    currencyLoading={output.outputLoading}
+                  />
+                  <TradeDetails
+                    trade={trade}
+                    inputAmounts={input}
+                    outputAmounts={output}
+                    feeAmounts={fees}
+                  />
+                  {/* <ButtonWrapper>
+                    <PrimaryButton
+                      className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[14px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
+                      disabled={!address}
+                      onClick={toggleConfirmationModal}
+                      variant="secondary"
+                    >
+                      {pendingTransaction
+                        ? "Swap Processing"
+                        : !address
+                          ? "Connect Wallet"
+                          : typedValue !== ""
+                            ? `Swap ${typedValue} ${inputCurrency?.symbol}`
+                            : "Enter An Amount"}
+                    </PrimaryButton>
+                  </ButtonWrapper> */}
+                  <SwapButton
+                    trade={trade}
+                    inAllowance={inAllowance}
+                    outAllowance={outAllowance}
+                    smartWalletDetails={smartWalletDetails}
+                    fees={fees}
+                  />
+                </BridgeModalContainer>
+              </div>
+              <div className="col-span-5 flex  w-full justify-end">
+                <TransactionsContainer>
+                  <div className="flex flex-col justify-center">
+                    <span className="font-semobold text-[15px] text-white">
+                      Transactions
+                    </span>
+                  </div>
+                  <div className="mt-2 flex h-full w-full flex-col">
+                    <TransactionRowontainer></TransactionRowontainer>
+                  </div>
+                </TransactionsContainer>
+              </div>
             </div>
-            <CurrencyInputField
-              currency={inputCurrency}
-              onCurrencySelect={handleInputSelect}
-              onTypeInput={handleTypeInput}
-              inputValue={input.inputValue}
-              currencyLoading={input.inputLoading}
-            />
-            <CurrencyInputField
-              currency={feeCurrency}
-              onCurrencySelect={handleFeeSelect}
-              onTypeInput={() => null}
-              inputValue={formatAmount(fees?.fees?.gasCostInBaseToken) ?? ""}
-              disabled
-              currencyLoading={fees.feesLoading}
-            />
-            <CurrencyInputField
-              currency={outputCurrency}
-              onCurrencySelect={handleOutputSelect}
-              onTypeInput={handleTypeOutput}
-              inputValue={fees.outputValueMinusFees}
-              currencyLoading={output.outputLoading}
-            />
-            <TradeDetails
-              trade={trade}
-              inputAmounts={input}
-              outputAmounts={output}
-              feeAmounts={fees}
-            />
-            <ButtonWrapper>
-              <PrimaryButton
-                className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[15px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
-                disabled={!address}
-                onClick={toggleConfirmationModal}
-                variant="secondary"
-              >
-                {pendingTransaction
-                  ? "Swap Processing"
-                  : !address
-                    ? "Connect Wallet"
-                    : typedValue !== ""
-                      ? `Swap ${typedValue} ${inputCurrency?.symbol}`
-                      : "Enter An Amount"}
-              </PrimaryButton>
-            </ButtonWrapper>
-          </BridgeModalContainer>
-          <TransactionsContainer>
-            <div className="flex flex-col gap-1">
-              <span className="font-semobold text-[18px] text-white">
-                Transactions
-              </span>
-              <span>nothing here yet.</span>
-            </div>
-          </TransactionsContainer>
+          </div>
         </div>
+        <div className="row-span-5" />
+        {trade && fees?.fees && inputCurrency && (
+          <TransactionFlowModals
+            trade={trade}
+            asset={inputCurrency}
+            fees={fees.fees}
+            buttonState={"Transaction"}
+            text={"Swap"}
+            inAllowance={inAllowance}
+            outAllowance={outAllowance}
+            smartWalletDetails={smartWalletDetails}
+            executeTx={swap}
+          />
+        )}
+        <GlowSecondary />
       </div>
-      <GlowSecondary />
     </>
   );
 };

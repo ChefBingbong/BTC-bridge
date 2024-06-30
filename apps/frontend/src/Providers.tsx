@@ -11,14 +11,14 @@ const queryClient = new QueryClient();
 export function Providers({ children }: { children: React.ReactNode }) {
   const wagmiConfig = useMemo(() => createWagmiConfig(), []);
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <TransactionFlowStateProvider>
+    <TransactionFlowStateProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
           <NextThemeProvider>
             <SaasProvider>{children}</SaasProvider>
           </NextThemeProvider>
-        </TransactionFlowStateProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </TransactionFlowStateProvider>
   );
 }

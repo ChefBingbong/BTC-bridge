@@ -7,7 +7,13 @@ import TransactionRejectedModal from "./TransactionRejectedModal";
 import TransactionSubmittedModal from "./TransactionSubmittedModal";
 import { useTransactionFlow } from "~/context/useTransactionFlowState";
 import { Backdrop } from "../CSS/WalletModal.styles";
-import { Currency } from "@pancakeswap/swap-sdk-core";
+import { Currency, TradeType } from "@pancakeswap/swap-sdk-core";
+import {
+  SmartWalletDetails,
+  WalletAllownceDetails,
+} from "@btc-swap/router-sdk";
+import { SmartRouterTrade } from "@pancakeswap/smart-router";
+import { FeeHistory } from "viem";
 
 interface ITopRow {
   isLeftDisplay?: boolean;
@@ -53,6 +59,11 @@ interface TxFlowProps {
   buttonState: string;
   asset: Currency;
   executeTx: () => Promise<void>;
+  trade: SmartRouterTrade<TradeType>;
+  inAllowance: WalletAllownceDetails;
+  outAllowance: WalletAllownceDetails;
+  smartWalletDetails: SmartWalletDetails;
+  fees: FeeHistory;
 }
 
 function TransactionFlowModals({
@@ -60,6 +71,11 @@ function TransactionFlowModals({
   buttonState,
   asset,
   executeTx,
+  trade,
+  inAllowance,
+  outAllowance,
+  smartWalletDetails,
+  fees,
 }: TxFlowProps) {
   const {
     pending,
@@ -84,6 +100,11 @@ function TransactionFlowModals({
             transactionType={"Transaction"}
             executeTx={executeTx}
             open={confirmation}
+            trade={trade}
+            inAllowance={inAllowance}
+            outAllowance={outAllowance}
+            smartWalletDetails={smartWalletDetails}
+            fees={fees}
           />
         )}
         {pending && (

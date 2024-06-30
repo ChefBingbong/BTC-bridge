@@ -2,6 +2,7 @@ import { UilAngleDown } from "@iconscout/react-unicons";
 import Image from "next/image";
 import type { Chain } from "viem";
 import { useAccount } from "wagmi";
+import PrimaryButton from "../Button/PrimaryButton/PrimaryButton";
 
 const ChainSelect = () => {
   const { chain: currentChain } = useAccount();
@@ -16,7 +17,10 @@ const ChainSelectorButton = ({
   activeChain: Chain | undefined;
 }) => {
   return (
-    <div className="w-auto rounded-3xl bg-[rgb(154,200,255)]  px-4 py-[6px] text-center">
+    <PrimaryButton
+      variant="secondary"
+      className="w-auto rounded-3xl bg-[rgb(154,200,255)]  px-2 py-[7px] text-center"
+    >
       <div className="flex min-w-full items-center justify-center gap-2">
         {activeChain?.id && (
           <Image
@@ -32,7 +36,7 @@ const ChainSelectorButton = ({
         </div>
         <UilAngleDown className={"h-6 w-6"} />
       </div>
-    </div>
+    </PrimaryButton>
   );
 };
 

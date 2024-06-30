@@ -1,9 +1,10 @@
 import styled, { css, keyframes } from "styled-components";
 import { Settings } from "react-feather";
+import { Flex } from "@pancakeswap/uikit";
 
 export const GlowSecondary = styled.div`
   position: absolute;
-  top: 15%;
+  top: 25%;
   left: 35%;
   //   bottom: 0;
   background: rgb(254, 215, 155);
@@ -12,7 +13,7 @@ export const GlowSecondary = styled.div`
     rgba(254, 215, 155, 1) 93%,
     rgba(29, 138, 191, 0) 97%
   );
-  filter: blur(120px);
+  filter: blur(135px);
   z-index: 1;
   max-width: 300px;
   width: 70%;
@@ -282,6 +283,7 @@ export const ButtonContents = styled.span`
 export const BridgeModalContainer = styled.div`
   // min-width: 480px;
   width: 460px;
+  // height: 100%;
   // color: White;
   background-color: rgba(184, 152, 233, 0.95);
   text-align: right;
@@ -304,15 +306,21 @@ export const BridgeModalContainer = styled.div`
 `;
 
 export const TransactionsContainer = styled.div`
-  height: 440px;
-  width: 650px;
-  border-radius: 1rem; /* 2xl */
+  height: 100%;
+  width: 750px;
+
   background-color: rgb(184, 152, 233);
-  padding: 0.75rem 1rem; /* py-3 px-4 */
+  padding: 6px 8px;
+  border-top: 1px solid rgb(214, 212, 245);
+  border-radius: 20px;
   box-shadow:
-    10px 10px 20px rgba(169, 134, 206, 0.1),
-    10px 10px 20px rgba(169, 134, 206, 0.1),
-    -10px 10px 30px rgba(169, 134, 206, 0.4);
+    inset 0 -5px 10px -5px rgba(29, 64, 76, 0.4),
+    -15px 15px 2px rgba(169, 134, 206, 0.1),
+    -10px 10px 2px rgba(169, 134, 206, 0.1),
+    -5px 5px 5px rgba(169, 134, 206, 0.1);
+
+  //   margin: 30px auto 0;
+  transition: height 3s ease-out;
 `;
 export const NetworkItem = styled.div<{ selected: boolean }>`
   padding: 0px 16px;
@@ -374,4 +382,19 @@ export const GlowingText = styled.span`
     css`
       animation: ${loadingAnimation} 1s infinite;
     `}
+`;
+
+export const TransactionRowontainer = styled(Flex)`
+  width: 100%;
+  height: 100px;
+  background: rgb(248, 240, 255);
+  border: 1.2px solid transparent;
+  // box-shadow: inset 0 1px 2px rgba(175, 151, 196, 0.3);
+  border-radius: 15px;
+  border: 1.2px solid rgb(244, 242, 243);
+  box-shadow:
+    inset 0 -5px 5px -5px rgba(29, 64, 76, 0.4),
+    -15px 15px 2px rgba(169, 134, 206, 0.1),
+    -10px 10px 2px rgba(169, 134, 206, 0.1),
+    -5px 5px 5px rgba(169, 134, 206, 0.1);
 `;

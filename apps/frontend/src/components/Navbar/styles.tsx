@@ -3,11 +3,12 @@ import styled from "styled-components";
 export const Nav = styled.nav`
   padding: 24px 16px;
   width: 100%;
-  height: 72px;
-  z-index: 2;
+  height: 84px;
+  z-index: 12;
   box-sizing: border-box;
   display: block;
   background-color: #ffffff20;
+  position: absolute;
 `;
 
 export const Box = styled.div`

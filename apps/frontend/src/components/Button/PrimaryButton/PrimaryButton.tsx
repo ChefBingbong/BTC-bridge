@@ -20,7 +20,7 @@ export const PrimaryButton = ({
 }: Props) => {
   return (
     <button
-      className={`flex items-center rounded-full px-5 text-center text-white ${variant === "secondary" ? "bg-[rgb(117,212,190)]" : "bg-[rgb(219,105,147)]"} ${className} focus-visible:ring-primary border-t border-[rgb(167,222,220)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`}
+      className={`flex items-center rounded-full px-5 text-center text-white ${variant === "secondary" ? "bg-[rgb(117,212,190,0.8)]" : "bg-[rgb(219,105,147)]"} ${className} focus-visible:ring-primary border-t border-[rgb(167,222,220)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`}
       disabled={disabled || loading}
       style={{
         boxShadow: "inset 0px -2.5px 0px 0px rgba(47,149,115, 0.65)",

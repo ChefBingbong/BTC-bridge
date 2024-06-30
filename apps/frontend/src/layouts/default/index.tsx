@@ -22,6 +22,25 @@ export const GlowSecondary = styled.div<{ top: number; right: number }>`
   height: 450px;
 `;
 
+export const GlowTertiary = styled.div<{ top: number; right: number }>`
+  top: ${({ top }: { top: number }) => top}%;
+  right: ${({ right }: { right: number }) => right}%;
+
+  background: rgb(42, 205, 187);
+  background: radial-gradient(
+    circle,
+    rgba(42, 205, 187, 1) 6%,
+    rgba(51, 224, 177, 1) 40%,
+    rgba(51, 224, 177, 0.5270702030812324) 78%
+  );
+  filter: blur(130px);
+  // z-index: -10;
+  width: 450px;
+  border-radius: 50%;
+  overflow: hidden;
+  height: 450px;
+`;
+
 export const GlowContainer = styled.div<{ top: number; right: number }>`
   position: absolute;
   top: ${({ top }: { top: number }) => top}%;
@@ -32,13 +51,24 @@ export const GlowContainer = styled.div<{ top: number; right: number }>`
   overflow: hidden;
   height: 550px;
 `;
+
+export const GlowContainer2 = styled.div<{ top: number; right: number }>`
+  position: absolute;
+  top: ${({ top }: { top: number }) => top}%;
+  right: ${({ right }: { right: number }) => right}%;
+  transform: rotate(145deg);
+  width: 700px;
+  border-radius: 50%;
+  overflow: hidden;
+  height: 700px;
+`;
 interface DefaultLayoutProps {
   children: React.ReactNode;
 }
 
 function DefaultLayout({ children }: DefaultLayoutProps) {
   return (
-    <div className=" relative flex h-screen w-screen flex-col items-center overflow-hidden bg-[rgb(216,190,254)]  text-white ">
+    <div className="relative  flex h-screen w-screen flex-col items-center overflow-hidden bg-[rgb(216,190,254)]  text-white ">
       <Navbar />
       <BottomNavBar />
 
@@ -47,12 +77,16 @@ function DefaultLayout({ children }: DefaultLayoutProps) {
       </GlowContainer>
 
       <div
-        id="layout"
-        className=" relative w-full flex-1 items-center overflow-hidden "
+        // id="layout"
+        className="relative w-full flex-1 items-center overflow-hidden "
       >
         <GlowContainer right={80} top={74}>
           <GlowSecondary right={-3} top={15} />
         </GlowContainer>
+        <GlowContainer2 right={-16} top={70}>
+          <GlowTertiary right={55} top={-20} />
+        </GlowContainer2>
+
         {children}
       </div>
     </div>

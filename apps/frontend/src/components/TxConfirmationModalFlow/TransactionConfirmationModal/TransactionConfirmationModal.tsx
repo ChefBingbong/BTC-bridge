@@ -6,9 +6,16 @@ import FeeSummary from "./components/FeeSummary";
 import TransactionSummary from "./components/TransactionSummary";
 import ProtocolBanner from "./components/GasOptionSummary";
 import styled from "styled-components";
-import { Currency } from "@pancakeswap/swap-sdk-core";
+import { Currency, TradeType } from "@pancakeswap/swap-sdk-core";
 import { ChainLogo } from "~/components/CurrencyLogo/ChainLogo";
 import { CurrencyLogo } from "~/components/CurrencyLogo/CurrencyLogo";
+import SwapButton from "~/components/Button/SwapButton/SwapButton";
+import { SmartRouterTrade } from "@pancakeswap/smart-router";
+import {
+  SmartWalletDetails,
+  WalletAllownceDetails,
+} from "@btc-swap/router-sdk";
+import { FeeHistory } from "viem";
 
 export const FormWrapper = styled.div`
   position: fixed;
@@ -40,6 +47,11 @@ interface IAssetModalInner {
   transactionType: string;
   text: string;
   executeTx: () => Promise<void>;
+  trade: SmartRouterTrade<TradeType>;
+  inAllowance: WalletAllownceDetails;
+  outAllowance: WalletAllownceDetails;
+  smartWalletDetails: SmartWalletDetails;
+  fees: FeeHistory;
 }
 
 const TxModalInner = ({
@@ -48,6 +60,11 @@ const TxModalInner = ({
   transactionType,
   close,
   executeTx,
+  trade,
+  inAllowance,
+  outAllowance,
+  smartWalletDetails,
+  fees,
 }: IAssetModalInner) => {
   return (
     <>
@@ -85,35 +102,42 @@ const TxModalInner = ({
       <FeeSummary asset={asset} text={text} />
       <ProtocolBanner type={"standard"} />
       <TransactionSummary fee={0.2} asset={asset} text={text} />
-      <PrimaryButton
-        variant="secondary"
-        className="bg-[rgb(154,200,255)]! w-full items-center justify-center rounded-[15px] py-4 font-semibold hover:bg-[rgb(164,210,255)]"
-        onClick={executeTx}
-      >
-        Confirm {transactionType}
-      </PrimaryButton>
+      {/* <SwapButton
+        trade={trade}
+        inAllowance={inAllowance}
+        outAllowance={outAllowance}
+        smartWalletDetails={smartWalletDetails}
+        fees={fees}
+      /> */}
     </>
   );
 };
 
 interface IAssetModal {
   toggleConfirmationModal: () => void;
-  confirmation: boolean;
-  text: string;
+  trade: SmartRouterTrade<TradeType>;
+  inAllowance: WalletAllownceDetails;
+  outAllowance: WalletAllownceDetails;
+  smartWalletDetails: SmartWalletDetails;
   asset: Currency;
   transactionType: string;
   executeTx: () => Promise<void>;
   open: boolean;
+  fees: FeeHistory;
 }
 
 const TxConfirmationModal = ({
   toggleConfirmationModal,
-  confirmation,
+  trade,
+  inAllowance,
+  outAllowance,
+  smartWalletDetails,
   text,
   asset,
   transactionType,
   executeTx,
   open,
+  fees,
 }: IAssetModal) => {
   return (
     <FormWrapper>
@@ -123,6 +147,11 @@ const TxConfirmationModal = ({
         transactionType={transactionType}
         close={toggleConfirmationModal}
         executeTx={executeTx}
+        trade={trade}
+        inAllowance={inAllowance}
+        outAllowance={outAllowance}
+        smartWalletDetails={smartWalletDetails}
+        fees={fees}
       />
     </FormWrapper>
   );

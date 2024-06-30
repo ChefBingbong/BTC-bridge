@@ -9,7 +9,7 @@ export const Wrapper = styled.div`
   width: 100%;
   -webkit-box-pack: justify;
   justify-content: space-between;
-  position: fixed;
+  position: absolute;
   bottom: 0px;
   z-index: 1000;
   /* background: black; */

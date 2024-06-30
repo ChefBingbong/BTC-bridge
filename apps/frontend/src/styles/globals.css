@@ -154,3 +154,18 @@
       transform: translate(24px, 0);
     }
   }
+
+
+    .gradient-border {
+      position: relative;
+      padding: 2px; /* Adjust based on border width */
+      background: linear-gradient(45deg, rgba(237,95,245,1) 0%, rgba(237,95,245,0.5) 50%, rgba(237,95,245,0) 100%);
+      border-radius: 0.375rem; /* Adjust based on your desired border radius */
+    }
+    .gradient-border input {
+      border: none;
+      outline: none;
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem; /* Match the border radius */
+    }
