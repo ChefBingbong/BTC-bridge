@@ -29,15 +29,11 @@
                   ]
             },
             "lint": {
-                  "dependsOn": [
-                        "@btc-swap/next-config#build"
-                  ],
+                 
                   "outputs": []
             },
             "dev": {
-                  "dependsOn": [
-                        "@btc-swap/next-config#build"
-                  ],
+                  
                   "cache": false,
                   "persistent": true
             },

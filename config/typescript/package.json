@@ -1,0 +1,6 @@
+{
+  "name": "@cross-chain-aggregator/typescript-config",
+  "version": "0.1.0",
+  "description": "cross-chain-aggregator TypeScript Config",
+  "keywords": ["sushi", "typescript", "config"]
+}

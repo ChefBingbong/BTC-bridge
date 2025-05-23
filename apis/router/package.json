@@ -1,0 +1,38 @@
+{
+  "name": "@cross-chain-aggregator/router-api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "cross-chain-aggregator Router API",
+  "keywords": [
+    "cross-chain-aggregator",
+    "api"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "artillery": "artillery run test/load.yml",
+    "build": "tsx",
+    "build:bin": "bun build src/index.ts --compile --outfile ./bin --sourcemap",
+    "check": "tsc --pretty --noEmit",
+    "clean": "rm -rf .turbo && rm -rf node_modules",
+    "compair-test": "ts-node --skip-project ./test/compair.ts",
+    "dev": "tsc -w",
+    "load-test": "bun ./test/load.ts",
+    "price-test": "bun run ./test/pricesCompare.ts",
+    "start": "bun run src/index.ts 2>&1 | bunx pino-pretty"
+  },
+  "dependencies": {
+    "@cross-chain-aggregator/core": "workspace:*",
+    "express": "^5.1.0",
+    "viem": "2.22.23"
+  },
+  "devDependencies": {
+    "@cross-chain-aggregator/typescript-config": "workspace:*",
+    "artillery": "2.0.21",
+    "autocannon": "8.0.0",
+    "ts-node": "10.9.2"
+  },
+  "exports": {
+    "./types": "./src/types.ts"
+  }
+}
